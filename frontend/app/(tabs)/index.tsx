@@ -21,17 +21,16 @@ export default function InboxScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { items, isLoading, fetchItems, sortOrder, setSortOrder, platformFilter, setPlatformFilter } = useItemsStore();
+  const { token } = useAuthStore(); // Subscribe to auth store to get token
   const [refreshing, setRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      // Get fresh token from auth store
-      const token = useAuthStore.getState().token;
       if (token) {
         fetchItems();
       }
-    }, [sortOrder, platformFilter])
+    }, [sortOrder, platformFilter, token])
   );
 
   const onRefresh = async () => {
