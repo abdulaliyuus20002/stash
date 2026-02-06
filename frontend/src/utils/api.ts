@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useAuthStore } from '../store/authStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -10,10 +10,24 @@ const api = axios.create({
   },
 });
 
+// Get token from AsyncStorage directly to avoid circular dependency
+const getToken = async () => {
+  try {
+    const authData = await AsyncStorage.getItem('auth-storage');
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      return parsed.state?.token || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
 // Add auth token to requests
 api.interceptors.request.use(
-  (config) => {
-    const token = useAuthStore.getState().token;
+  async (config) => {
+    const token = await getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,9 +39,10 @@ api.interceptors.request.use(
 // Handle auth errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
+      // Clear auth storage on 401
+      await AsyncStorage.removeItem('auth-storage');
     }
     return Promise.reject(error);
   }
