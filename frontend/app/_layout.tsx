@@ -14,10 +14,16 @@ export default function RootLayout() {
 
   useEffect(() => {
     const init = async () => {
-      if (token) {
-        await checkAuth();
+      try {
+        if (token) {
+          await checkAuth();
+        }
+      } catch (error) {
+        console.log('Auth check error:', error);
+      } finally {
+        // Always set loading to false after a short delay
+        setTimeout(() => setIsLoading(false), 500);
       }
-      setIsLoading(false);
     };
     init();
   }, []);
