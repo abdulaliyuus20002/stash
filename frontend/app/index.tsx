@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../src/hooks/useTheme';
-import { Button } from '../src/components';
-import { spacing, typography, borderRadius } from '../src/utils/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/src/hooks/useTheme';
+import { Button } from '@/src/components';
+import { spacing, typography, borderRadius } from '@/src/utils/theme';
 
 export default function WelcomeScreen() {
   const router = useRouter();
