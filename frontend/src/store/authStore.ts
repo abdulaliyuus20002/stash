@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { User, AuthResponse } from '../types';
 import { API_URL } from '../utils/config';
+import { setToken } from '../utils/tokenStorage';
 
 interface AuthState {
   user: User | null;
@@ -13,7 +14,7 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   isLoading: false,
@@ -26,9 +27,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         email,
         password,
       });
+      const token = response.data.access_token;
+      setToken(token);  // Update shared token storage
       set({
         user: response.data.user,
-        token: response.data.access_token,
+        token: token,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -46,9 +49,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         password,
         name,
       });
+      const token = response.data.access_token;
+      setToken(token);  // Update shared token storage
       set({
         user: response.data.user,
-        token: response.data.access_token,
+        token: token,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -59,6 +64,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: () => {
+    setToken(null);  // Clear shared token storage
     set({
       user: null,
       token: null,
@@ -66,6 +72,3 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   },
 }));
-
-// Export function to get token from outside React
-export const getAuthToken = () => useAuthStore.getState().token;
