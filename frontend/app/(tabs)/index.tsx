@@ -21,16 +21,26 @@ export default function InboxScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { items, isLoading, fetchItems, sortOrder, setSortOrder, platformFilter, setPlatformFilter } = useItemsStore();
-  const { token } = useAuthStore(); // Subscribe to auth store to get token
+  const token = useAuthStore((state) => state.token); // Subscribe with selector
   const [refreshing, setRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
+
+  // Effect to fetch items when token becomes available
+  useEffect(() => {
+    if (token && !hasFetched) {
+      fetchItems();
+      setHasFetched(true);
+    }
+  }, [token, hasFetched]);
 
   useFocusEffect(
     useCallback(() => {
+      // Re-fetch when screen comes into focus (if token exists)
       if (token) {
         fetchItems();
       }
-    }, [sortOrder, platformFilter, token])
+    }, [sortOrder, platformFilter])
   );
 
   const onRefresh = async () => {
