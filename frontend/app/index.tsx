@@ -1,15 +1,22 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, Redirect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/hooks/useTheme';
+import { useAuthStore } from '@/src/store/authStore';
 import { Button } from '@/src/components';
 import { spacing, typography, borderRadius } from '@/src/utils/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { isAuthenticated } = useAuthStore();
+
+  // Redirect to tabs if already authenticated
+  if (isAuthenticated) {
+    return <Redirect href="/(tabs)" />;
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
