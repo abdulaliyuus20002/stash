@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import { User, AuthResponse } from '../types';
-import api from '../utils/api';
+
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
 interface AuthState {
   user: User | null;
@@ -26,7 +28,7 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true });
         try {
-          const response = await api.post<AuthResponse>('/auth/login', {
+          const response = await axios.post<AuthResponse>(`${API_URL}/api/auth/login`, {
             email,
             password,
           });
@@ -45,7 +47,7 @@ export const useAuthStore = create<AuthState>()(
       register: async (email: string, password: string, name?: string) => {
         set({ isLoading: true });
         try {
-          const response = await api.post<AuthResponse>('/auth/register', {
+          const response = await axios.post<AuthResponse>(`${API_URL}/api/auth/register`, {
             email,
             password,
             name,
@@ -77,7 +79,9 @@ export const useAuthStore = create<AuthState>()(
           return;
         }
         try {
-          const response = await api.get('/auth/me');
+          const response = await axios.get(`${API_URL}/api/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           set({
             user: response.data,
             isAuthenticated: true,
