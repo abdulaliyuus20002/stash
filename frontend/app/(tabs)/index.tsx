@@ -13,6 +13,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useItemsStore } from '@/src/store/itemsStore';
+import { useAuthStore } from '@/src/store/authStore';
 import { ItemCard } from '@/src/components';
 import { spacing, typography, borderRadius } from '@/src/utils/theme';
 
