@@ -25,11 +25,11 @@ export default function InboxScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      // Small delay to ensure token is propagated after auth state change
-      const timer = setTimeout(() => {
+      // Get fresh token from auth store
+      const token = useAuthStore.getState().token;
+      if (token) {
         fetchItems();
-      }, 100);
-      return () => clearTimeout(timer);
+      }
     }, [sortOrder, platformFilter])
   );
 
