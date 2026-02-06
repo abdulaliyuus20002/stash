@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_URL } from './config';
+import { getAuthToken } from '../store/authStore';
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
@@ -8,20 +9,12 @@ const api = axios.create({
   },
 });
 
-// Store for token - will be set by auth store
-let authToken: string | null = null;
-
-export const setAuthToken = (token: string | null) => {
-  authToken = token;
-};
-
-export const getAuthToken = () => authToken;
-
 // Add auth token to requests
 api.interceptors.request.use(
   (config) => {
-    if (authToken) {
-      config.headers.Authorization = `Bearer ${authToken}`;
+    const token = getAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
