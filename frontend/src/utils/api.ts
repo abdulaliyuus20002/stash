@@ -1,6 +1,5 @@
-import axios from 'axios';
+import axios, { InternalAxiosRequestConfig } from 'axios';
 import { API_URL } from './config';
-import { getToken } from './tokenStorage';
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
@@ -9,16 +8,13 @@ const api = axios.create({
   },
 });
 
-// Add auth token to requests
-api.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// Store token on the axios instance defaults
+export const setApiToken = (token: string | null) => {
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common['Authorization'];
+  }
+};
 
 export default api;

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { User, AuthResponse } from '../types';
 import { API_URL } from '../utils/config';
-import { setToken } from '../utils/tokenStorage';
+import api, { setApiToken } from '../utils/api';
 
 interface AuthState {
   user: User | null;
@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         password,
       });
       const token = response.data.access_token;
-      setToken(token);  // Update shared token storage
+      setApiToken(token);  // Set token on the api instance
       set({
         user: response.data.user,
         token: token,
@@ -50,7 +50,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         name,
       });
       const token = response.data.access_token;
-      setToken(token);  // Update shared token storage
+      setApiToken(token);  // Set token on the api instance
       set({
         user: response.data.user,
         token: token,
@@ -64,7 +64,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    setToken(null);  // Clear shared token storage
+    setApiToken(null);  // Clear token from api instance
     set({
       user: null,
       token: null,
