@@ -36,7 +36,9 @@ export default function CollectionsScreen() {
 
   useEffect(() => {
     if (token) {
-      fetchCollections(token);
+      fetchCollections(token).catch((err) => {
+        console.log('Collections fetch error:', err);
+      });
     }
   }, [token]);
 
