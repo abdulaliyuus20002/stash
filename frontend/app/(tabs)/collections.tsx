@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   TextInput as RNTextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useCollectionsStore } from '@/src/store/collectionsStore';
@@ -24,6 +24,7 @@ export default function CollectionsScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { user } = useAuthStore();
+  const token = useAuthStore((state) => state.token);
   const { collections, isLoading, fetchCollections, addCollection, updateCollection, deleteCollection } = useCollectionsStore();
   const [refreshing, setRefreshing] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -33,15 +34,16 @@ export default function CollectionsScreen() {
 
   const maxCollections = user?.plan_type === 'pro' ? Infinity : 5;
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchCollections();
-    }, [])
-  );
+  useEffect(() => {
+    if (token) {
+      fetchCollections(token);
+    }
+  }, [token]);
 
   const onRefresh = async () => {
+    if (!token) return;
     setRefreshing(true);
-    await fetchCollections();
+    await fetchCollections(token);
     setRefreshing(false);
   };
 
@@ -70,12 +72,17 @@ export default function CollectionsScreen() {
       return;
     }
 
+    if (!token) {
+      Alert.alert('Error', 'Please log in first');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       if (editingId) {
-        await updateCollection(editingId, newName.trim());
+        await updateCollection(token, editingId, newName.trim());
       } else {
-        await addCollection(newName.trim());
+        await addCollection(token, newName.trim());
       }
       setShowModal(false);
       setNewName('');
@@ -97,8 +104,9 @@ export default function CollectionsScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            if (!token) return;
             try {
-              await deleteCollection(id);
+              await deleteCollection(token, id);
             } catch (error) {
               Alert.alert('Error', 'Failed to delete collection');
             }
