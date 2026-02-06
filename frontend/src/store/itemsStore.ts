@@ -1,6 +1,8 @@
 import { create } from 'zustand';
+import axios from 'axios';
 import { SavedItem, MetadataResponse } from '../types';
-import api from '../utils/api';
+import { API_URL } from '../utils/config';
+import { useAuthStore } from './authStore';
 
 interface ItemsState {
   items: SavedItem[];
@@ -16,6 +18,12 @@ interface ItemsState {
   setPlatformFilter: (platform: string | null) => void;
   searchItems: (query: string) => Promise<SavedItem[]>;
 }
+
+// Helper to get auth headers
+const getAuthHeaders = () => {
+  const token = useAuthStore.getState().token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 export const useItemsStore = create<ItemsState>((set, get) => ({
   items: [],
@@ -33,7 +41,9 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
       if (collectionId) params.append('collection', collectionId);
       if (tag) params.append('tag', tag);
 
-      const response = await api.get(`/items?${params.toString()}`);
+      const response = await axios.get(`${API_URL}/api/items?${params.toString()}`, {
+        headers: getAuthHeaders(),
+      });
       set({ items: response.data, isLoading: false });
     } catch (error) {
       set({ isLoading: false });
@@ -43,7 +53,9 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
 
   addItem: async (url: string, data?: Partial<SavedItem>) => {
     try {
-      const response = await api.post('/items', { url, ...data });
+      const response = await axios.post(`${API_URL}/api/items`, { url, ...data }, {
+        headers: getAuthHeaders(),
+      });
       const newItem = response.data;
       set((state) => ({ items: [newItem, ...state.items] }));
       return newItem;
@@ -54,7 +66,9 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
 
   updateItem: async (id: string, data: Partial<SavedItem>) => {
     try {
-      const response = await api.put(`/items/${id}`, data);
+      const response = await axios.put(`${API_URL}/api/items/${id}`, data, {
+        headers: getAuthHeaders(),
+      });
       set((state) => ({
         items: state.items.map((item) =>
           item.id === id ? response.data : item
@@ -67,7 +81,9 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
 
   deleteItem: async (id: string) => {
     try {
-      await api.delete(`/items/${id}`);
+      await axios.delete(`${API_URL}/api/items/${id}`, {
+        headers: getAuthHeaders(),
+      });
       set((state) => ({
         items: state.items.filter((item) => item.id !== id),
       }));
@@ -77,7 +93,9 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
   },
 
   extractMetadata: async (url: string) => {
-    const response = await api.post('/extract-metadata', { url });
+    const response = await axios.post(`${API_URL}/api/extract-metadata`, { url }, {
+      headers: getAuthHeaders(),
+    });
     return response.data;
   },
 
@@ -86,7 +104,9 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
 
   searchItems: async (query: string) => {
     if (!query || query.length < 2) return [];
-    const response = await api.get(`/search?q=${encodeURIComponent(query)}`);
+    const response = await axios.get(`${API_URL}/api/search?q=${encodeURIComponent(query)}`, {
+      headers: getAuthHeaders(),
+    });
     return response.data;
   },
 }));
