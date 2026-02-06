@@ -9,11 +9,14 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const themeColors = isDark ? darkColors : colors;
-  const { isAuthenticated, token, checkAuth } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, hasHydrated, checkAuth, token } = useAuthStore();
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    const init = async () => {
+    const initialize = async () => {
+      // Wait for hydration
+      if (!hasHydrated) return;
+      
       try {
         if (token) {
           await checkAuth();
@@ -21,14 +24,15 @@ export default function RootLayout() {
       } catch (error) {
         console.log('Auth check error:', error);
       } finally {
-        // Always set loading to false after a short delay
-        setTimeout(() => setIsLoading(false), 500);
+        setIsInitializing(false);
       }
     };
-    init();
-  }, []);
 
-  if (isLoading) {
+    initialize();
+  }, [hasHydrated, token]);
+
+  // Show loading while hydrating or initializing
+  if (!hasHydrated || isInitializing) {
     return (
       <View style={[styles.loading, { backgroundColor: themeColors.background }]}>
         <ActivityIndicator size="large" color={themeColors.accent} />
