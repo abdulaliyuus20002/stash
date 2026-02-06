@@ -33,8 +33,9 @@ export default function InboxScreen() {
   }, [token, sortOrder, platformFilter]);
 
   const onRefresh = async () => {
+    if (!token) return;
     setRefreshing(true);
-    await fetchItems();
+    await fetchItems(token);
     setRefreshing(false);
   };
 
