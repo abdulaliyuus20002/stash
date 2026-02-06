@@ -2,28 +2,26 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { SavedItem, MetadataResponse } from '../types';
 import { API_URL } from '../utils/config';
-import { useAuthStore } from './authStore';
 
 interface ItemsState {
   items: SavedItem[];
   isLoading: boolean;
   sortOrder: 'newest' | 'oldest';
   platformFilter: string | null;
-  fetchItems: (collectionId?: string, tag?: string) => Promise<void>;
-  addItem: (url: string, data?: Partial<SavedItem>) => Promise<SavedItem>;
-  updateItem: (id: string, data: Partial<SavedItem>) => Promise<void>;
-  deleteItem: (id: string) => Promise<void>;
-  extractMetadata: (url: string) => Promise<MetadataResponse>;
+  fetchItems: (token: string, collectionId?: string, tag?: string) => Promise<void>;
+  addItem: (token: string, url: string, data?: Partial<SavedItem>) => Promise<SavedItem>;
+  updateItem: (token: string, id: string, data: Partial<SavedItem>) => Promise<void>;
+  deleteItem: (token: string, id: string) => Promise<void>;
+  extractMetadata: (token: string, url: string) => Promise<MetadataResponse>;
   setSortOrder: (order: 'newest' | 'oldest') => void;
   setPlatformFilter: (platform: string | null) => void;
-  searchItems: (query: string) => Promise<SavedItem[]>;
+  searchItems: (token: string, query: string) => Promise<SavedItem[]>;
 }
 
-// Helper to get auth headers
-const getAuthHeaders = () => {
-  const token = useAuthStore.getState().token;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+const getHeaders = (token: string) => ({
+  Authorization: `Bearer ${token}`,
+  'Content-Type': 'application/json',
+});
 
 export const useItemsStore = create<ItemsState>((set, get) => ({
   items: [],
@@ -31,7 +29,7 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
   sortOrder: 'newest',
   platformFilter: null,
 
-  fetchItems: async (collectionId?: string, tag?: string) => {
+  fetchItems: async (token: string, collectionId?: string, tag?: string) => {
     set({ isLoading: true });
     try {
       const { sortOrder, platformFilter } = get();
@@ -42,7 +40,7 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
       if (tag) params.append('tag', tag);
 
       const response = await axios.get(`${API_URL}/api/items?${params.toString()}`, {
-        headers: getAuthHeaders(),
+        headers: getHeaders(token),
       });
       set({ items: response.data, isLoading: false });
     } catch (error) {
@@ -51,10 +49,10 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
     }
   },
 
-  addItem: async (url: string, data?: Partial<SavedItem>) => {
+  addItem: async (token: string, url: string, data?: Partial<SavedItem>) => {
     try {
       const response = await axios.post(`${API_URL}/api/items`, { url, ...data }, {
-        headers: getAuthHeaders(),
+        headers: getHeaders(token),
       });
       const newItem = response.data;
       set((state) => ({ items: [newItem, ...state.items] }));
@@ -64,10 +62,10 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
     }
   },
 
-  updateItem: async (id: string, data: Partial<SavedItem>) => {
+  updateItem: async (token: string, id: string, data: Partial<SavedItem>) => {
     try {
       const response = await axios.put(`${API_URL}/api/items/${id}`, data, {
-        headers: getAuthHeaders(),
+        headers: getHeaders(token),
       });
       set((state) => ({
         items: state.items.map((item) =>
@@ -79,10 +77,10 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
     }
   },
 
-  deleteItem: async (id: string) => {
+  deleteItem: async (token: string, id: string) => {
     try {
       await axios.delete(`${API_URL}/api/items/${id}`, {
-        headers: getAuthHeaders(),
+        headers: getHeaders(token),
       });
       set((state) => ({
         items: state.items.filter((item) => item.id !== id),
@@ -92,9 +90,9 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
     }
   },
 
-  extractMetadata: async (url: string) => {
+  extractMetadata: async (token: string, url: string) => {
     const response = await axios.post(`${API_URL}/api/extract-metadata`, { url }, {
-      headers: getAuthHeaders(),
+      headers: getHeaders(token),
     });
     return response.data;
   },
@@ -102,10 +100,10 @@ export const useItemsStore = create<ItemsState>((set, get) => ({
   setSortOrder: (order) => set({ sortOrder: order }),
   setPlatformFilter: (platform) => set({ platformFilter: platform }),
 
-  searchItems: async (query: string) => {
+  searchItems: async (token: string, query: string) => {
     if (!query || query.length < 2) return [];
     const response = await axios.get(`${API_URL}/api/search?q=${encodeURIComponent(query)}`, {
-      headers: getAuthHeaders(),
+      headers: getHeaders(token),
     });
     return response.data;
   },
