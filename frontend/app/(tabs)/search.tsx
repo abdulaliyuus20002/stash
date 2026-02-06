@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useItemsStore } from '@/src/store/itemsStore';
+import { useAuthStore } from '@/src/store/authStore';
 import { SearchBar, ItemCard } from '@/src/components';
 import { SavedItem } from '@/src/types';
 import { spacing, typography, borderRadius } from '@/src/utils/theme';
@@ -20,13 +21,14 @@ export default function SearchScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { searchItems } = useItemsStore();
+  const token = useAuthStore((state) => state.token);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SavedItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
   const performSearch = useCallback(async (searchQuery: string) => {
-    if (searchQuery.length < 2) {
+    if (searchQuery.length < 2 || !token) {
       setResults([]);
       setHasSearched(false);
       return;
@@ -34,7 +36,7 @@ export default function SearchScreen() {
 
     setIsSearching(true);
     try {
-      const searchResults = await searchItems(searchQuery);
+      const searchResults = await searchItems(token, searchQuery);
       setResults(searchResults);
       setHasSearched(true);
     } catch (error) {
@@ -42,7 +44,7 @@ export default function SearchScreen() {
     } finally {
       setIsSearching(false);
     }
-  }, [searchItems]);
+  }, [searchItems, token]);
 
   const debouncedSearch = useDebouncedCallback(performSearch, 300);
 
