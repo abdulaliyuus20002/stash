@@ -9,12 +9,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/hooks/useTheme';
-import { useItemsStore } from '../../src/store/itemsStore';
-import { SearchBar, ItemCard } from '../../src/components';
-import { SavedItem } from '../../src/types';
-import { spacing, typography, borderRadius } from '../../src/utils/theme';
-import { useDebouncedCallback } from '../../src/hooks/useDebounce';
+import { useTheme } from '@/src/hooks/useTheme';
+import { useItemsStore } from '@/src/store/itemsStore';
+import { SearchBar, ItemCard } from '@/src/components';
+import { SavedItem } from '@/src/types';
+import { spacing, typography, borderRadius } from '@/src/utils/theme';
+import { useDebouncedCallback } from '@/src/hooks/useDebounce';
 
 export default function SearchScreen() {
   const router = useRouter();

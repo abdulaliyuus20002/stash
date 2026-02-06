@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/hooks/useTheme';
-import { useCollectionsStore } from '../../src/store/collectionsStore';
-import { useAuthStore } from '../../src/store/authStore';
-import { CollectionCard, Button } from '../../src/components';
-import { spacing, typography, borderRadius } from '../../src/utils/theme';
+import { useTheme } from '@/src/hooks/useTheme';
+import { useCollectionsStore } from '@/src/store/collectionsStore';
+import { useAuthStore } from '@/src/store/authStore';
+import { CollectionCard, Button } from '@/src/components';
+import { spacing, typography, borderRadius } from '@/src/utils/theme';
 
 export default function CollectionsScreen() {
   const router = useRouter();

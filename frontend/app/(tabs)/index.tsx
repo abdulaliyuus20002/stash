@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/hooks/useTheme';
-import { useItemsStore } from '../../src/store/itemsStore';
-import { ItemCard } from '../../src/components';
-import { spacing, typography, borderRadius } from '../../src/utils/theme';
+import { useTheme } from '@/src/hooks/useTheme';
+import { useItemsStore } from '@/src/store/itemsStore';
+import { ItemCard } from '@/src/components';
+import { spacing, typography, borderRadius } from '@/src/utils/theme';
 
 export default function InboxScreen() {
   const router = useRouter();

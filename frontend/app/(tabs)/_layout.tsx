@@ -1,10 +1,10 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/hooks/useTheme';
+import { useTheme } from '@/src/hooks/useTheme';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { borderRadius } from '../../src/utils/theme';
+import { borderRadius } from '@/src/utils/theme';
 
 export default function TabsLayout() {
   const { colors } = useTheme();

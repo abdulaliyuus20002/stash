@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/hooks/useTheme';
-import { useAuthStore } from '../../src/store/authStore';
-import { spacing, typography, borderRadius } from '../../src/utils/theme';
+import { useTheme } from '@/src/hooks/useTheme';
+import { useAuthStore } from '@/src/store/authStore';
+import { spacing, typography, borderRadius } from '@/src/utils/theme';
 
 export default function ProfileScreen() {
   const { colors } = useTheme();

@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView, 
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../src/hooks/useTheme';
-import { useAuthStore } from '../src/store/authStore';
-import { Button, TextInput } from '../src/components';
-import { spacing, typography, borderRadius } from '../src/utils/theme';
+import { useTheme } from '@/src/hooks/useTheme';
+import { useAuthStore } from '@/src/store/authStore';
+import { Button, TextInput } from '@/src/components';
+import { spacing, typography } from '@/src/utils/theme';
 
 export default function LoginScreen() {
   const router = useRouter();

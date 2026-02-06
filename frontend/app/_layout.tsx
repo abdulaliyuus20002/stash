@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme, View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useAuthStore } from '../src/store/authStore';
-import { colors, darkColors } from '../src/utils/theme';
+import { useAuthStore } from '@/src/store/authStore';
+import { colors, darkColors } from '@/src/utils/theme';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
