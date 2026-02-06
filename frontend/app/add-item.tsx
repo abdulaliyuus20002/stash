@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useItemsStore } from '@/src/store/itemsStore';
 import { useCollectionsStore } from '@/src/store/collectionsStore';
+import { useAuthStore } from '@/src/store/authStore';
 import { Button, TextInput } from '@/src/components';
 import { MetadataResponse } from '@/src/types';
 import { spacing, typography, borderRadius } from '@/src/utils/theme';
@@ -25,6 +25,7 @@ export default function AddItemScreen() {
   const { colors } = useTheme();
   const { addItem, extractMetadata } = useItemsStore();
   const { collections, fetchCollections } = useCollectionsStore();
+  const token = useAuthStore((state) => state.token);
 
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
@@ -38,12 +39,19 @@ export default function AddItemScreen() {
   const [showCollections, setShowCollections] = useState(false);
 
   useEffect(() => {
-    fetchCollections();
-  }, []);
+    if (token) {
+      fetchCollections(token);
+    }
+  }, [token]);
 
   const handleExtractMetadata = async () => {
     if (!url.trim()) {
       Alert.alert('Error', 'Please enter a URL');
+      return;
+    }
+
+    if (!token) {
+      Alert.alert('Error', 'Please log in first');
       return;
     }
 
@@ -58,7 +66,7 @@ export default function AddItemScreen() {
     setIsExtracting(true);
     try {
       const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-      const result = await extractMetadata(fullUrl);
+      const result = await extractMetadata(token, fullUrl);
       setMetadata(result);
       setTitle(result.title);
       setTags(result.suggested_tags);
@@ -96,10 +104,15 @@ export default function AddItemScreen() {
       return;
     }
 
+    if (!token) {
+      Alert.alert('Error', 'Please log in first');
+      return;
+    }
+
     setIsSaving(true);
     try {
       const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-      await addItem(fullUrl, {
+      await addItem(token, fullUrl, {
         title: title || fullUrl,
         thumbnail_url: metadata?.thumbnail_url,
         platform: metadata?.platform || 'Web',
