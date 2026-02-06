@@ -10,12 +10,12 @@ import {
 import { useLocalSearchParams, useRouter, useFocusEffect, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/hooks/useTheme';
-import { useCollectionsStore } from '../../src/store/collectionsStore';
-import { ItemCard } from '../../src/components';
-import { SavedItem, Collection } from '../../src/types';
-import { spacing, typography, borderRadius } from '../../src/utils/theme';
-import api from '../../src/utils/api';
+import { useTheme } from '@/src/hooks/useTheme';
+import { useCollectionsStore } from '@/src/store/collectionsStore';
+import { ItemCard } from '@/src/components';
+import { SavedItem, Collection } from '@/src/types';
+import { spacing, typography, borderRadius } from '@/src/utils/theme';
+import api from '@/src/utils/api';
 
 export default function CollectionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

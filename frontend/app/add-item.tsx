@@ -13,12 +13,12 @@ import {
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../src/hooks/useTheme';
-import { useItemsStore } from '../src/store/itemsStore';
-import { useCollectionsStore } from '../src/store/collectionsStore';
-import { Button, TextInput } from '../src/components';
-import { MetadataResponse } from '../src/types';
-import { spacing, typography, borderRadius } from '../src/utils/theme';
+import { useTheme } from '@/src/hooks/useTheme';
+import { useItemsStore } from '@/src/store/itemsStore';
+import { useCollectionsStore } from '@/src/store/collectionsStore';
+import { Button, TextInput } from '@/src/components';
+import { MetadataResponse } from '@/src/types';
+import { spacing, typography, borderRadius } from '@/src/utils/theme';
 
 export default function AddItemScreen() {
   const router = useRouter();

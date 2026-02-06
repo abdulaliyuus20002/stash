@@ -10,19 +10,18 @@ import {
   Image,
   Linking,
   TextInput as RNTextInput,
-  Modal,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/hooks/useTheme';
-import { useItemsStore } from '../../src/store/itemsStore';
-import { useCollectionsStore } from '../../src/store/collectionsStore';
-import { SavedItem } from '../../src/types';
-import { Button } from '../../src/components';
-import { spacing, typography, borderRadius } from '../../src/utils/theme';
+import { useTheme } from '@/src/hooks/useTheme';
+import { useItemsStore } from '@/src/store/itemsStore';
+import { useCollectionsStore } from '@/src/store/collectionsStore';
+import { SavedItem } from '@/src/types';
+import { Button } from '@/src/components';
+import { spacing, typography, borderRadius } from '@/src/utils/theme';
 import { format } from 'date-fns';
-import api from '../../src/utils/api';
+import api from '@/src/utils/api';
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -123,7 +122,7 @@ export default function ItemDetailScreen() {
 
   const toggleCollection = (collectionId: string) => {
     if (selectedCollections.includes(collectionId)) {
-      setSelectedCollections(selectedCollections.filter((id) => id !== collectionId));
+      setSelectedCollections(selectedCollections.filter((cid) => cid !== collectionId));
     } else {
       setSelectedCollections([...selectedCollections, collectionId]);
     }
