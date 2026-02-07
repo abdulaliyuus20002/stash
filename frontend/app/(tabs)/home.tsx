@@ -556,4 +556,44 @@ const styles = StyleSheet.create({
   collectionCount: {
     fontSize: typography.bodySmall.fontSize,
   },
+  // Responsive styles for small screens
+  statsContainerSmall: {
+    gap: spacing.xs,
+  },
+  statCardSmall: {
+    padding: spacing.xs,
+  },
+  statIconSmall: {
+    width: 32,
+    height: 32,
+  },
+  statNumberSmall: {
+    fontSize: 18,
+  },
+  statLabelSmall: {
+    fontSize: 9,
+  },
+  sectionSmall: {
+    paddingHorizontal: spacing.sm,
+  },
+  sectionTitleSmall: {
+    fontSize: typography.body.fontSize,
+  },
+  digestTitleSmall: {
+    fontSize: typography.bodySmall.fontSize,
+  },
+  digestTextSmall: {
+    fontSize: typography.bodySmall.fontSize,
+    lineHeight: 20,
+  },
+  resurfacedImageSmall: {
+    width: 40,
+    height: 40,
+  },
+  resurfacedTitleSmall: {
+    fontSize: typography.bodySmall.fontSize,
+  },
+  resurfacedDaysSmall: {
+    fontSize: 10,
+  },
 });
