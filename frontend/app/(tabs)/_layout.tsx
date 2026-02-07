@@ -65,11 +65,11 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="insights"
+        name="search"
         options={{
-          title: 'Insights',
+          title: 'Search',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="analytics" size={size} color={color} />
+            <Ionicons name="search" size={size} color={color} />
           ),
         }}
       />
@@ -92,9 +92,9 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="insights"
         options={{
-          href: null, // Hide from tab bar but keep accessible
+          href: null, // Hide Insights from tab bar, accessible via Home quick actions
         }}
       />
     </Tabs>
