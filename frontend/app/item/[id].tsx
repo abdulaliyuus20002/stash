@@ -41,6 +41,9 @@ export default function ItemDetailScreen() {
   const [tagInput, setTagInput] = useState('');
   const [showCollections, setShowCollections] = useState(false);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [aiSummary, setAiSummary] = useState<string[]>([]);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [collectionSuggestion, setCollectionSuggestion] = useState<{collection_name: string; reason: string} | null>(null);
 
   useEffect(() => {
     if (token && id) {
