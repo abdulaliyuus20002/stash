@@ -216,6 +216,46 @@ export default function ItemDetailScreen() {
             <Ionicons name="open-outline" size={18} color={colors.accent} />
           </TouchableOpacity>
 
+          {/* AI Summary Section */}
+          <View style={[styles.aiSection, { backgroundColor: colors.accent + '10', borderColor: colors.accent + '30' }]}>
+            <View style={styles.aiHeader}>
+              <View style={styles.aiTitleRow}>
+                <Ionicons name="sparkles" size={18} color={colors.accent} />
+                <Text style={[styles.aiTitle, { color: colors.text }]}>AI Summary</Text>
+              </View>
+              {aiSummary.length === 0 && (
+                <TouchableOpacity
+                  style={[styles.generateButton, { backgroundColor: colors.accent }]}
+                  onPress={generateAISummary}
+                  disabled={isGeneratingSummary}
+                >
+                  {isGeneratingSummary ? (
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  ) : (
+                    <>
+                      <Ionicons name="flash" size={14} color={colors.primary} />
+                      <Text style={[styles.generateText, { color: colors.primary }]}>Generate</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+            {aiSummary.length > 0 ? (
+              <View style={styles.summaryList}>
+                {aiSummary.map((point, index) => (
+                  <View key={index} style={styles.summaryItem}>
+                    <Text style={[styles.summaryBullet, { color: colors.accent }]}>•</Text>
+                    <Text style={[styles.summaryText, { color: colors.textSecondary }]}>{point}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : !isGeneratingSummary ? (
+              <Text style={[styles.aiPlaceholder, { color: colors.textMuted }]}>
+                Generate an AI summary to get quick insights about this content
+              </Text>
+            ) : null}
+          </View>
+
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Notes</Text>
             <RNTextInput
