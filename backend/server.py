@@ -116,6 +116,7 @@ class CollectionResponse(BaseModel):
     name: str
     item_count: int = 0
     created_at: datetime
+    is_auto: bool = False
 
 class MetadataResponse(BaseModel):
     title: str
@@ -123,6 +124,30 @@ class MetadataResponse(BaseModel):
     platform: str
     content_type: str
     suggested_tags: List[str] = []
+
+# New models for AI features
+class UserPreferences(BaseModel):
+    save_types: List[str] = []  # startup_ideas, content_inspiration, etc.
+    usage_goals: List[str] = []  # organize_ideas, second_brain, etc.
+    onboarding_completed: bool = False
+
+class InsightsResponse(BaseModel):
+    total_items: int
+    items_this_week: int
+    top_platforms: List[Dict[str, Any]]
+    top_tags: List[Dict[str, Any]]
+    collections_count: int
+    weekly_summary: Optional[str] = None
+    resurfaced_items: List[Dict[str, Any]] = []
+
+class AISummaryRequest(BaseModel):
+    item_id: str
+
+class AutoCollectionSuggestion(BaseModel):
+    collection_name: str
+    reason: str
+    is_new: bool = True
+    existing_collection_id: Optional[str] = None
 
 # ============== Auth Helpers ==============
 
