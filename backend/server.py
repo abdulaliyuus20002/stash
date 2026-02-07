@@ -685,6 +685,170 @@ async def generate_weekly_summary(user_id: str, items: List[dict]) -> Optional[s
         logger.error(f"Weekly summary error: {e}")
         return None
 
+# ============== PREMIUM AI FEATURES ==============
+
+async def extract_ideas(title: str, url: str, platform: str) -> List[Dict[str, str]]:
+    """Extract key ideas and insights from content - PREMIUM FEATURE"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            return []
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"ideas-{uuid.uuid4()}",
+            system_message="""You are an expert idea extractor. Analyze content and extract 3-5 key ideas or insights.
+For each idea, provide:
+1. A short title (3-5 words)
+2. A brief description (1 sentence)
+3. A category: "concept", "insight", "strategy", "quote", or "takeaway"
+
+Format your response as:
+IDEA: [title]
+DESC: [description]
+TYPE: [category]
+
+Repeat for each idea."""
+        ).with_model("openai", "gpt-4")
+        
+        user_message = UserMessage(
+            text=f"Extract key ideas from this content:\nTitle: {title}\nPlatform: {platform}\nURL: {url}"
+        )
+        
+        response = await chat.send_message(user_message)
+        
+        # Parse ideas from response
+        ideas = []
+        current_idea = {}
+        
+        for line in response.strip().split('\n'):
+            line = line.strip()
+            if line.startswith('IDEA:'):
+                if current_idea:
+                    ideas.append(current_idea)
+                current_idea = {"title": line[5:].strip()}
+            elif line.startswith('DESC:'):
+                current_idea["description"] = line[5:].strip()
+            elif line.startswith('TYPE:'):
+                current_idea["type"] = line[5:].strip().lower()
+        
+        if current_idea and "title" in current_idea:
+            ideas.append(current_idea)
+        
+        return ideas[:5]
+    except Exception as e:
+        logger.error(f"Idea extraction error: {e}")
+        return []
+
+async def generate_smart_tags(title: str, url: str, platform: str, existing_tags: List[str] = None) -> List[Dict[str, Any]]:
+    """Generate smart tag suggestions with clustering - PREMIUM FEATURE"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            return []
+        
+        existing_str = ", ".join(existing_tags) if existing_tags else "none"
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"tags-{uuid.uuid4()}",
+            system_message="""You are a content tagging expert. Suggest 5-7 relevant tags for content organization.
+Consider:
+- Topic/subject matter
+- Content type (tutorial, review, news, etc.)
+- Industry/domain
+- Skill level (beginner, advanced, etc.)
+- Action type (read, watch, implement, etc.)
+
+For each tag, indicate confidence (high, medium, low) and cluster/category.
+
+Format:
+TAG: [tag_name] | CONFIDENCE: [high/medium/low] | CLUSTER: [category]"""
+        ).with_model("openai", "gpt-4")
+        
+        user_message = UserMessage(
+            text=f"Suggest smart tags for:\nTitle: {title}\nPlatform: {platform}\nExisting tags: {existing_str}"
+        )
+        
+        response = await chat.send_message(user_message)
+        
+        # Parse tags
+        tags = []
+        for line in response.strip().split('\n'):
+            if line.startswith('TAG:'):
+                parts = line.split('|')
+                if len(parts) >= 3:
+                    tag_name = parts[0].replace('TAG:', '').strip()
+                    confidence = parts[1].replace('CONFIDENCE:', '').strip().lower()
+                    cluster = parts[2].replace('CLUSTER:', '').strip()
+                    tags.append({
+                        "name": tag_name,
+                        "confidence": confidence,
+                        "cluster": cluster,
+                        "is_new": tag_name.lower() not in [t.lower() for t in (existing_tags or [])]
+                    })
+        
+        return tags[:7]
+    except Exception as e:
+        logger.error(f"Smart tags error: {e}")
+        return []
+
+async def generate_action_items(title: str, url: str, platform: str, notes: str = "") -> List[Dict[str, Any]]:
+    """Turn saved content into actionable tasks - PREMIUM FEATURE"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            return []
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"actions-{uuid.uuid4()}",
+            system_message="""You are a productivity expert. Convert saved content into 3-5 specific, actionable tasks.
+Each action should be:
+- Concrete and specific
+- Achievable in a reasonable timeframe
+- Relevant to the content
+
+Format each action as:
+ACTION: [task description]
+PRIORITY: [high/medium/low]
+TIME: [estimated time: 5min/15min/30min/1hr/2hr+]
+CATEGORY: [learn/create/share/implement/review]"""
+        ).with_model("openai", "gpt-4")
+        
+        notes_str = f"\nUser notes: {notes}" if notes else ""
+        
+        user_message = UserMessage(
+            text=f"Generate action items from this saved content:\nTitle: {title}\nPlatform: {platform}\nURL: {url}{notes_str}"
+        )
+        
+        response = await chat.send_message(user_message)
+        
+        # Parse action items
+        actions = []
+        current_action = {}
+        
+        for line in response.strip().split('\n'):
+            line = line.strip()
+            if line.startswith('ACTION:'):
+                if current_action and "task" in current_action:
+                    actions.append(current_action)
+                current_action = {"task": line[7:].strip(), "completed": False}
+            elif line.startswith('PRIORITY:'):
+                current_action["priority"] = line[9:].strip().lower()
+            elif line.startswith('TIME:'):
+                current_action["estimated_time"] = line[5:].strip()
+            elif line.startswith('CATEGORY:'):
+                current_action["category"] = line[9:].strip().lower()
+        
+        if current_action and "task" in current_action:
+            actions.append(current_action)
+        
+        return actions[:5]
+    except Exception as e:
+        logger.error(f"Action items error: {e}")
+        return []
+
 # ============== AI Endpoints ==============
 
 @api_router.post("/items/{item_id}/ai-summary")
