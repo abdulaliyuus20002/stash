@@ -63,11 +63,46 @@ export default function ItemDetailScreen() {
       setEditedNotes(fetchedItem.notes || '');
       setEditedTags(fetchedItem.tags || []);
       setSelectedCollections(fetchedItem.collections || []);
+      if (fetchedItem.ai_summary) {
+        setAiSummary(fetchedItem.ai_summary);
+      }
     } catch (error) {
       Alert.alert('Error', 'Could not load item');
       router.back();
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const generateAISummary = async () => {
+    if (!token || !id) return;
+    setIsGeneratingSummary(true);
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/items/${id}/ai-summary`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data.summary && response.data.summary.length > 0) {
+        setAiSummary(response.data.summary);
+      }
+    } catch (error) {
+      console.log('AI summary error:', error);
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
+  const getCollectionSuggestion = async () => {
+    if (!token || !id) return;
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/items/${id}/suggest-collection`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setCollectionSuggestion(response.data);
+    } catch (error) {
+      console.log('Collection suggestion error:', error);
     }
   };
 
