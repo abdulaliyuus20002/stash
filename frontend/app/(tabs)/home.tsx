@@ -122,38 +122,54 @@ export default function HomeScreen() {
         </View>
 
         {/* Stats Cards */}
-        <View style={styles.statsContainer}>
+        <View style={[styles.statsContainer, isSmallScreen && styles.statsContainerSmall]}>
           <TouchableOpacity
-            style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[
+              styles.statCard, 
+              { backgroundColor: colors.card, borderColor: colors.border },
+              isSmallScreen && styles.statCardSmall
+            ]}
             onPress={() => router.push('/(tabs)/index')}
+            activeOpacity={0.7}
           >
-            <View style={[styles.statIconContainer, { backgroundColor: colors.accent + '20' }]}>
-              <Ionicons name="bookmark" size={24} color={colors.accent} />
+            <View style={[styles.statIconContainer, { backgroundColor: colors.accent + '20' }, isSmallScreen && styles.statIconSmall]}>
+              <Ionicons name="bookmark" size={isSmallScreen ? 20 : 24} color={colors.accent} />
             </View>
-            <Text style={[styles.statNumber, { color: colors.text }]}>{items.length}</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Saved Items</Text>
+            <Text style={[styles.statNumber, { color: colors.text }, isSmallScreen && styles.statNumberSmall]}>{items.length}</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }, isSmallScreen && styles.statLabelSmall]}>Saved</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[
+              styles.statCard, 
+              { backgroundColor: colors.card, borderColor: colors.border },
+              isSmallScreen && styles.statCardSmall
+            ]}
             onPress={() => router.push('/(tabs)/collections')}
+            activeOpacity={0.7}
           >
-            <View style={[styles.statIconContainer, { backgroundColor: colors.accent + '20' }]}>
-              <Ionicons name="folder" size={24} color={colors.accent} />
+            <View style={[styles.statIconContainer, { backgroundColor: colors.accent + '20' }, isSmallScreen && styles.statIconSmall]}>
+              <Ionicons name="folder" size={isSmallScreen ? 20 : 24} color={colors.accent} />
             </View>
-            <Text style={[styles.statNumber, { color: colors.text }]}>{collections.length}</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Collections</Text>
+            <Text style={[styles.statNumber, { color: colors.text }, isSmallScreen && styles.statNumberSmall]}>{collections.length}</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }, isSmallScreen && styles.statLabelSmall]}>Collections</Text>
           </TouchableOpacity>
 
-          <View
-            style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+          <TouchableOpacity
+            style={[
+              styles.statCard, 
+              { backgroundColor: colors.card, borderColor: colors.border },
+              isSmallScreen && styles.statCardSmall
+            ]}
+            onPress={() => {}}
+            activeOpacity={0.9}
           >
-            <View style={[styles.statIconContainer, { backgroundColor: '#22c55e20' }]}>
-              <Ionicons name="trending-up" size={24} color="#22c55e" />
+            <View style={[styles.statIconContainer, { backgroundColor: '#22c55e20' }, isSmallScreen && styles.statIconSmall]}>
+              <Ionicons name="trending-up" size={isSmallScreen ? 20 : 24} color="#22c55e" />
             </View>
-            <Text style={[styles.statNumber, { color: colors.text }]}>{insights?.items_this_week || 0}</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>This Week</Text>
-          </View>
+            <Text style={[styles.statNumber, { color: colors.text }, isSmallScreen && styles.statNumberSmall]}>{insights?.items_this_week || 0}</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }, isSmallScreen && styles.statLabelSmall]}>This Week</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Weekly Digest / AI Summary */}
