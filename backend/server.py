@@ -865,6 +865,85 @@ async def generate_item_summary(item_id: str, current_user: dict = Depends(get_c
     
     return {"summary": summary}
 
+@api_router.post("/items/{item_id}/extract-ideas")
+async def extract_item_ideas(item_id: str, current_user: dict = Depends(get_current_user)):
+    """Extract key ideas from an item - PREMIUM FEATURE"""
+    item = await db.items.find_one({"id": item_id, "user_id": current_user["id"]})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    ideas = await extract_ideas(item.get("title", ""), item.get("url", ""), item.get("platform", "Web"))
+    
+    if ideas:
+        await db.items.update_one({"id": item_id}, {"$set": {"extracted_ideas": ideas}})
+    
+    return {"ideas": ideas}
+
+@api_router.post("/items/{item_id}/smart-tags")
+async def generate_item_smart_tags(item_id: str, current_user: dict = Depends(get_current_user)):
+    """Generate smart tag suggestions - PREMIUM FEATURE"""
+    item = await db.items.find_one({"id": item_id, "user_id": current_user["id"]})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    tags = await generate_smart_tags(
+        item.get("title", ""), 
+        item.get("url", ""), 
+        item.get("platform", "Web"),
+        item.get("tags", [])
+    )
+    
+    return {"suggested_tags": tags}
+
+@api_router.post("/items/{item_id}/action-items")
+async def generate_item_actions(item_id: str, current_user: dict = Depends(get_current_user)):
+    """Generate action items from content - PREMIUM FEATURE"""
+    item = await db.items.find_one({"id": item_id, "user_id": current_user["id"]})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    actions = await generate_action_items(
+        item.get("title", ""), 
+        item.get("url", ""), 
+        item.get("platform", "Web"),
+        item.get("notes", "")
+    )
+    
+    if actions:
+        await db.items.update_one({"id": item_id}, {"$set": {"action_items": actions}})
+    
+    return {"action_items": actions}
+
+@api_router.put("/items/{item_id}/action-items/{action_index}/toggle")
+async def toggle_action_item(item_id: str, action_index: int, current_user: dict = Depends(get_current_user)):
+    """Toggle action item completion status"""
+    item = await db.items.find_one({"id": item_id, "user_id": current_user["id"]})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    action_items = item.get("action_items", [])
+    if action_index < 0 or action_index >= len(action_items):
+        raise HTTPException(status_code=400, detail="Invalid action index")
+    
+    action_items[action_index]["completed"] = not action_items[action_index].get("completed", False)
+    await db.items.update_one({"id": item_id}, {"$set": {"action_items": action_items}})
+    
+    return {"action_items": action_items}
+
+@api_router.post("/items/{item_id}/apply-smart-tag")
+async def apply_smart_tag(item_id: str, tag_name: str, current_user: dict = Depends(get_current_user)):
+    """Apply a suggested smart tag to an item"""
+    item = await db.items.find_one({"id": item_id, "user_id": current_user["id"]})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    current_tags = item.get("tags", [])
+    if tag_name not in current_tags:
+        current_tags.append(tag_name)
+        await db.items.update_one({"id": item_id}, {"$set": {"tags": current_tags}})
+    
+    return {"tags": current_tags}
+
 @api_router.get("/items/{item_id}/suggest-collection")
 async def get_collection_suggestion(item_id: str, current_user: dict = Depends(get_current_user)):
     """Get AI collection suggestion for an item"""
