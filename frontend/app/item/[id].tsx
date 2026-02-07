@@ -377,6 +377,188 @@ export default function ItemDetailScreen() {
             ) : null}
           </View>
 
+          {/* Premium AI Features Panel */}
+          <View style={[styles.premiumPanel, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <TouchableOpacity 
+              style={styles.premiumHeader}
+              onPress={() => setShowAIPanel(!showAIPanel)}
+            >
+              <View style={styles.premiumTitleRow}>
+                <View style={[styles.premiumBadge, { backgroundColor: colors.accent }]}>
+                  <Ionicons name="diamond" size={14} color={colors.primary} />
+                </View>
+                <Text style={[styles.premiumTitle, { color: colors.text }]}>AI Power Tools</Text>
+              </View>
+              <Ionicons 
+                name={showAIPanel ? "chevron-up" : "chevron-down"} 
+                size={20} 
+                color={colors.textMuted} 
+              />
+            </TouchableOpacity>
+
+            {showAIPanel && (
+              <View style={styles.premiumContent}>
+                {/* Idea Extraction */}
+                <View style={styles.aiFeatureCard}>
+                  <View style={styles.aiFeatureHeader}>
+                    <View style={styles.aiFeatureTitleRow}>
+                      <Ionicons name="bulb-outline" size={18} color={colors.accent} />
+                      <Text style={[styles.aiFeatureTitle, { color: colors.text }]}>Key Ideas</Text>
+                    </View>
+                    {extractedIdeas.length === 0 && (
+                      <TouchableOpacity
+                        style={[styles.aiFeatureButton, { backgroundColor: colors.inputBg }]}
+                        onPress={extractIdeas}
+                        disabled={isExtractingIdeas}
+                      >
+                        {isExtractingIdeas ? (
+                          <ActivityIndicator size="small" color={colors.accent} />
+                        ) : (
+                          <Text style={[styles.aiFeatureButtonText, { color: colors.accent }]}>Extract</Text>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  {extractedIdeas.length > 0 && (
+                    <View style={styles.ideasList}>
+                      {extractedIdeas.map((idea, index) => (
+                        <View key={index} style={[styles.ideaCard, { backgroundColor: colors.inputBg }]}>
+                          <View style={styles.ideaHeader}>
+                            <Text style={[styles.ideaTitle, { color: colors.text }]}>{idea.title}</Text>
+                            {idea.type && (
+                              <View style={[styles.ideaType, { backgroundColor: colors.accent + '20' }]}>
+                                <Text style={[styles.ideaTypeText, { color: colors.accent }]}>{idea.type}</Text>
+                              </View>
+                            )}
+                          </View>
+                          {idea.description && (
+                            <Text style={[styles.ideaDesc, { color: colors.textSecondary }]}>{idea.description}</Text>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
+
+                {/* Smart Tags */}
+                <View style={styles.aiFeatureCard}>
+                  <View style={styles.aiFeatureHeader}>
+                    <View style={styles.aiFeatureTitleRow}>
+                      <Ionicons name="pricetags-outline" size={18} color={colors.accent} />
+                      <Text style={[styles.aiFeatureTitle, { color: colors.text }]}>Smart Tags</Text>
+                    </View>
+                    {smartTags.length === 0 && (
+                      <TouchableOpacity
+                        style={[styles.aiFeatureButton, { backgroundColor: colors.inputBg }]}
+                        onPress={generateSmartTags}
+                        disabled={isGeneratingTags}
+                      >
+                        {isGeneratingTags ? (
+                          <ActivityIndicator size="small" color={colors.accent} />
+                        ) : (
+                          <Text style={[styles.aiFeatureButtonText, { color: colors.accent }]}>Suggest</Text>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  {smartTags.length > 0 && (
+                    <View style={styles.smartTagsContainer}>
+                      {smartTags.map((tag, index) => (
+                        <TouchableOpacity 
+                          key={index} 
+                          style={[
+                            styles.smartTag, 
+                            { 
+                              backgroundColor: tag.confidence === 'high' ? colors.accent + '20' : colors.inputBg,
+                              borderColor: tag.confidence === 'high' ? colors.accent : colors.border
+                            }
+                          ]}
+                          onPress={() => applySmartTag(tag.name)}
+                        >
+                          <Text style={[styles.smartTagText, { color: tag.confidence === 'high' ? colors.accent : colors.textSecondary }]}>
+                            #{tag.name}
+                          </Text>
+                          <Ionicons name="add-circle" size={16} color={tag.confidence === 'high' ? colors.accent : colors.textMuted} />
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </View>
+
+                {/* Action Items */}
+                <View style={styles.aiFeatureCard}>
+                  <View style={styles.aiFeatureHeader}>
+                    <View style={styles.aiFeatureTitleRow}>
+                      <Ionicons name="checkbox-outline" size={18} color={colors.accent} />
+                      <Text style={[styles.aiFeatureTitle, { color: colors.text }]}>Action Items</Text>
+                    </View>
+                    {actionItems.length === 0 && (
+                      <TouchableOpacity
+                        style={[styles.aiFeatureButton, { backgroundColor: colors.inputBg }]}
+                        onPress={generateActionItems}
+                        disabled={isGeneratingActions}
+                      >
+                        {isGeneratingActions ? (
+                          <ActivityIndicator size="small" color={colors.accent} />
+                        ) : (
+                          <Text style={[styles.aiFeatureButtonText, { color: colors.accent }]}>Generate</Text>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  {actionItems.length > 0 && (
+                    <View style={styles.actionsList}>
+                      {actionItems.map((action, index) => (
+                        <TouchableOpacity 
+                          key={index} 
+                          style={[styles.actionItem, { backgroundColor: colors.inputBg }]}
+                          onPress={() => toggleActionItem(index)}
+                        >
+                          <View style={[
+                            styles.actionCheckbox, 
+                            { 
+                              borderColor: action.completed ? colors.accent : colors.border,
+                              backgroundColor: action.completed ? colors.accent : 'transparent'
+                            }
+                          ]}>
+                            {action.completed && <Ionicons name="checkmark" size={14} color={colors.primary} />}
+                          </View>
+                          <View style={styles.actionContent}>
+                            <Text style={[
+                              styles.actionTask, 
+                              { 
+                                color: action.completed ? colors.textMuted : colors.text,
+                                textDecorationLine: action.completed ? 'line-through' : 'none'
+                              }
+                            ]}>{action.task}</Text>
+                            <View style={styles.actionMeta}>
+                              {action.priority && (
+                                <View style={[styles.actionPriority, { 
+                                  backgroundColor: action.priority === 'high' ? '#ef444420' : 
+                                    action.priority === 'medium' ? '#f59e0b20' : '#22c55e20' 
+                                }]}>
+                                  <Text style={[styles.actionPriorityText, { 
+                                    color: action.priority === 'high' ? '#ef4444' : 
+                                      action.priority === 'medium' ? '#f59e0b' : '#22c55e' 
+                                  }]}>{action.priority}</Text>
+                                </View>
+                              )}
+                              {action.estimated_time && (
+                                <Text style={[styles.actionTime, { color: colors.textMuted }]}>
+                                  ⏱ {action.estimated_time}
+                                </Text>
+                              )}
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
+          </View>
+
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Notes</Text>
             <RNTextInput
