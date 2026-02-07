@@ -123,6 +123,97 @@ export default function ItemDetailScreen() {
     }
   };
 
+  const extractIdeas = async () => {
+    if (!token || !id) return;
+    setIsExtractingIdeas(true);
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/items/${id}/extract-ideas`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data.ideas) {
+        setExtractedIdeas(response.data.ideas);
+      }
+    } catch (error) {
+      console.log('Idea extraction error:', error);
+    } finally {
+      setIsExtractingIdeas(false);
+    }
+  };
+
+  const generateSmartTags = async () => {
+    if (!token || !id) return;
+    setIsGeneratingTags(true);
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/items/${id}/smart-tags`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data.suggested_tags) {
+        setSmartTags(response.data.suggested_tags);
+      }
+    } catch (error) {
+      console.log('Smart tags error:', error);
+    } finally {
+      setIsGeneratingTags(false);
+    }
+  };
+
+  const generateActionItems = async () => {
+    if (!token || !id) return;
+    setIsGeneratingActions(true);
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/items/${id}/action-items`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data.action_items) {
+        setActionItems(response.data.action_items);
+      }
+    } catch (error) {
+      console.log('Action items error:', error);
+    } finally {
+      setIsGeneratingActions(false);
+    }
+  };
+
+  const toggleActionItem = async (index: number) => {
+    if (!token || !id) return;
+    try {
+      const response = await axios.put(
+        `${API_URL}/api/items/${id}/action-items/${index}/toggle`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data.action_items) {
+        setActionItems(response.data.action_items);
+      }
+    } catch (error) {
+      console.log('Toggle action error:', error);
+    }
+  };
+
+  const applySmartTag = async (tagName: string) => {
+    if (!token || !id) return;
+    try {
+      await axios.post(
+        `${API_URL}/api/items/${id}/apply-smart-tag?tag_name=${encodeURIComponent(tagName)}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!editedTags.includes(tagName)) {
+        setEditedTags([...editedTags, tagName]);
+      }
+      // Remove from smart tags suggestions
+      setSmartTags(smartTags.filter(t => t.name !== tagName));
+    } catch (error) {
+      console.log('Apply tag error:', error);
+    }
+  };
+
   const getCollectionSuggestion = async () => {
     if (!token || !id) return;
     try {
