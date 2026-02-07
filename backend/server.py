@@ -100,9 +100,12 @@ class SavedItemResponse(BaseModel):
     tags: List[str] = []
     collections: List[str] = []
     created_at: datetime
+    ai_summary: Optional[List[str]] = None
+    suggested_collection: Optional[str] = None
 
 class CollectionCreate(BaseModel):
     name: str
+    is_auto: bool = False
 
 class CollectionUpdate(BaseModel):
     name: str
