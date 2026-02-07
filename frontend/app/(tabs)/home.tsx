@@ -50,6 +50,12 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [insights, setInsights] = useState<InsightsData | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
+  
+  // Responsive dimensions
+  const { width } = useWindowDimensions();
+  const isSmallScreen = width < 380;
+  const isMediumScreen = width >= 380 && width < 768;
+  const isLargeScreen = width >= 768;
 
   const fetchInsights = useCallback(async () => {
     if (!token) return;
