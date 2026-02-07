@@ -116,12 +116,12 @@ export default function HomeScreen() {
 
             <TouchableOpacity
               style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={() => router.push('/(tabs)/search')}
+              onPress={() => router.push('/(tabs)/insights')}
             >
               <View style={[styles.actionIcon, { backgroundColor: colors.inputBg }]}>
-                <Ionicons name="search" size={20} color={colors.textSecondary} />
+                <Ionicons name="analytics" size={20} color={colors.textSecondary} />
               </View>
-              <Text style={[styles.actionText, { color: colors.text }]}>Search</Text>
+              <Text style={[styles.actionText, { color: colors.text }]}>Insights</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
