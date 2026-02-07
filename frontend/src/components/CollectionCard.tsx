@@ -48,16 +48,36 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
 
       <View style={styles.actions}>
         {onEdit && (
-          <TouchableOpacity onPress={onEdit} style={styles.actionButton}>
+          <TouchableOpacity 
+            onPress={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }} 
+            style={styles.actionButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Ionicons name="pencil" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         )}
         {onDelete && (
-          <TouchableOpacity onPress={onDelete} style={styles.actionButton}>
+          <TouchableOpacity 
+            onPress={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }} 
+            style={styles.actionButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Ionicons name="trash-outline" size={18} color={colors.error} />
           </TouchableOpacity>
         )}
-        <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        <TouchableOpacity 
+          onPress={onPress}
+          style={styles.arrowButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
