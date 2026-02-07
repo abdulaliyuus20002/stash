@@ -136,7 +136,70 @@ export default function HomeScreen() {
             <Text style={[styles.statNumber, { color: colors.text }]}>{collections.length}</Text>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Collections</Text>
           </TouchableOpacity>
+
+          <View
+            style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+          >
+            <View style={[styles.statIconContainer, { backgroundColor: '#22c55e20' }]}>
+              <Ionicons name="trending-up" size={24} color="#22c55e" />
+            </View>
+            <Text style={[styles.statNumber, { color: colors.text }]}>{insights?.items_this_week || 0}</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>This Week</Text>
+          </View>
         </View>
+
+        {/* Weekly Digest / AI Summary */}
+        {insights?.weekly_summary && (
+          <View style={styles.section}>
+            <View style={[styles.digestCard, { backgroundColor: colors.accent + '15' }]}>
+              <View style={styles.digestHeader}>
+                <View style={[styles.digestIcon, { backgroundColor: colors.accent }]}>
+                  <Ionicons name="sparkles" size={18} color={colors.primary} />
+                </View>
+                <Text style={[styles.digestTitle, { color: colors.text }]}>Weekly Insights</Text>
+              </View>
+              <Text style={[styles.digestText, { color: colors.textSecondary }]}>
+                {insights.weekly_summary}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Resurfaced Items - "Remember These?" */}
+        {insights?.resurfaced_items && insights.resurfaced_items.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons name="time-outline" size={20} color={colors.accent} />
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Remember These?</Text>
+              </View>
+            </View>
+            {insights.resurfaced_items.slice(0, 2).map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[styles.resurfacedCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+                onPress={() => router.push(`/item/${item.id}`)}
+              >
+                {item.thumbnail_url ? (
+                  <Image source={{ uri: item.thumbnail_url }} style={styles.resurfacedImage} />
+                ) : (
+                  <View style={[styles.resurfacedImagePlaceholder, { backgroundColor: colors.inputBg }]}>
+                    <Ionicons name="image-outline" size={20} color={colors.textMuted} />
+                  </View>
+                )}
+                <View style={styles.resurfacedContent}>
+                  <Text style={[styles.resurfacedTitle, { color: colors.text }]} numberOfLines={2}>
+                    {item.title}
+                  </Text>
+                  <Text style={[styles.resurfacedDays, { color: colors.accent }]}>
+                    {item.message}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         {/* Quick Actions */}
         <View style={styles.section}>
