@@ -23,7 +23,7 @@ export default function TabsLayout() {
           height: 85,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '500',
           marginTop: 4,
         },
@@ -65,11 +65,11 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="insights"
         options={{
-          title: 'Search',
+          title: 'Insights',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" size={size} color={color} />
+            <Ionicons name="analytics" size={size} color={color} />
           ),
         }}
       />
@@ -89,6 +89,12 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          href: null, // Hide from tab bar but keep accessible
         }}
       />
     </Tabs>
