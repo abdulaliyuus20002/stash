@@ -225,28 +225,6 @@ export default function HomeScreen() {
             ))}
           </View>
         )}
-                onPress={() => router.push(`/item/${item.id}`)}
-              >
-                {item.thumbnail_url ? (
-                  <Image source={{ uri: item.thumbnail_url }} style={styles.resurfacedImage} />
-                ) : (
-                  <View style={[styles.resurfacedImagePlaceholder, { backgroundColor: colors.inputBg }]}>
-                    <Ionicons name="image-outline" size={20} color={colors.textMuted} />
-                  </View>
-                )}
-                <View style={styles.resurfacedContent}>
-                  <Text style={[styles.resurfacedTitle, { color: colors.text }]} numberOfLines={2}>
-                    {item.title}
-                  </Text>
-                  <Text style={[styles.resurfacedDays, { color: colors.accent }]}>
-                    {item.message}
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
 
         {/* Quick Actions */}
         <View style={styles.section}>
