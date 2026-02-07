@@ -45,6 +45,9 @@ export default function LoginScreen() {
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            accessibilityLabel="Go back"
+            accessibilityRole="button"
           >
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
