@@ -123,4 +123,8 @@ const styles = StyleSheet.create({
   actionButton: {
     padding: spacing.xs,
   },
+  arrowButton: {
+    padding: spacing.xs,
+    marginLeft: spacing.xs,
+  },
 });
