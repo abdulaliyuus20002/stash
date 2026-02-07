@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -17,6 +18,25 @@ import { useItemsStore } from '@/src/store/itemsStore';
 import { useCollectionsStore } from '@/src/store/collectionsStore';
 import { ItemCard } from '@/src/components';
 import { spacing, typography, borderRadius } from '@/src/utils/theme';
+import axios from 'axios';
+import { API_URL } from '@/src/utils/config';
+
+interface InsightsData {
+  total_items: number;
+  items_this_week: number;
+  top_platforms: { platform: string; count: number }[];
+  top_tags: { tag: string; count: number }[];
+  collections_count: number;
+  weekly_summary: string | null;
+  resurfaced_items: {
+    id: string;
+    title: string;
+    thumbnail_url: string | null;
+    platform: string;
+    days_ago: number;
+    message: string;
+  }[];
+}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -26,18 +46,36 @@ export default function HomeScreen() {
   const { items, isLoading: itemsLoading, fetchItems } = useItemsStore();
   const { collections, isLoading: collectionsLoading, fetchCollections } = useCollectionsStore();
   const [refreshing, setRefreshing] = useState(false);
+  const [insights, setInsights] = useState<InsightsData | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+
+  const fetchInsights = useCallback(async () => {
+    if (!token) return;
+    setInsightsLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/insights`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setInsights(response.data);
+    } catch (error) {
+      console.log('Insights fetch error:', error);
+    } finally {
+      setInsightsLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
     if (token) {
       fetchItems(token);
       fetchCollections(token);
+      fetchInsights();
     }
   }, [token]);
 
   const onRefresh = async () => {
     if (!token) return;
     setRefreshing(true);
-    await Promise.all([fetchItems(token), fetchCollections(token)]);
+    await Promise.all([fetchItems(token), fetchCollections(token), fetchInsights()]);
     setRefreshing(false);
   };
 
