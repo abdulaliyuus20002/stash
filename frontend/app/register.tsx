@@ -37,7 +37,7 @@ export default function RegisterScreen() {
 
     try {
       await register(email, password, name || undefined);
-      router.replace('/(tabs)/home');
+      router.replace('/onboarding');
     } catch (error: any) {
       Alert.alert('Error', error.message);
     }
