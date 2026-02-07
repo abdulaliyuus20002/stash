@@ -538,6 +538,303 @@ async def get_all_tags(current_user: dict = Depends(get_current_user)):
     result = await db.items.aggregate(pipeline).to_list(100)
     return [r["_id"] for r in result]
 
+# ============== AI Features ==============
+
+# Platform to auto-collection mapping
+PLATFORM_COLLECTIONS = {
+    'YouTube': 'Videos',
+    'TikTok': 'Videos',
+    'Instagram': 'Social',
+    'X': 'Social',
+    'LinkedIn': 'Professional',
+    'Medium': 'Articles',
+    'Substack': 'Articles',
+    'Reddit': 'Discussions',
+    'GitHub': 'Tech & Code',
+    'Web': 'Web Saves'
+}
+
+async def generate_ai_summary(title: str, url: str, platform: str) -> List[str]:
+    """Generate AI summary using GPT-4"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            return []
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"summary-{uuid.uuid4()}",
+            system_message="You are a helpful assistant that creates concise bullet-point summaries. Always respond with exactly 3-5 bullet points, each starting with '•'. Keep each point under 15 words."
+        ).with_model("openai", "gpt-4")
+        
+        user_message = UserMessage(
+            text=f"Create a brief summary of this saved content:\nTitle: {title}\nPlatform: {platform}\nURL: {url}\n\nProvide 3-5 key bullet points about what this content likely covers based on the title."
+        )
+        
+        response = await chat.send_message(user_message)
+        
+        # Parse bullet points from response
+        lines = response.strip().split('\n')
+        bullets = []
+        for line in lines:
+            line = line.strip()
+            if line.startswith('•') or line.startswith('-') or line.startswith('*'):
+                bullet = line.lstrip('•-* ').strip()
+                if bullet:
+                    bullets.append(bullet)
+        
+        return bullets[:5] if bullets else []
+    except Exception as e:
+        logger.error(f"AI summary error: {e}")
+        return []
+
+async def suggest_auto_collection(title: str, platform: str, user_id: str) -> Optional[Dict]:
+    """Suggest auto-collection based on platform and AI analysis"""
+    try:
+        # First try platform-based suggestion
+        platform_collection = PLATFORM_COLLECTIONS.get(platform, 'General')
+        
+        # Check if user has this collection
+        existing = await db.collections.find_one({
+            "user_id": user_id,
+            "name": platform_collection
+        })
+        
+        if existing:
+            return {
+                "collection_name": platform_collection,
+                "reason": f"Based on {platform} content",
+                "is_new": False,
+                "existing_collection_id": existing["id"]
+            }
+        
+        # Try AI-based suggestion for more specific categorization
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if api_key:
+            chat = LlmChat(
+                api_key=api_key,
+                session_id=f"collection-{uuid.uuid4()}",
+                system_message="You are a content organizer. Suggest ONE collection name (2-3 words max) for organizing content. Just respond with the collection name, nothing else."
+            ).with_model("openai", "gpt-4")
+            
+            user_message = UserMessage(
+                text=f"Suggest a collection name for: '{title}' from {platform}"
+            )
+            
+            response = await chat.send_message(user_message)
+            ai_suggestion = response.strip().strip('"\'')
+            
+            if ai_suggestion and len(ai_suggestion) < 30:
+                # Check if this collection exists
+                existing_ai = await db.collections.find_one({
+                    "user_id": user_id,
+                    "name": {"$regex": f"^{ai_suggestion}$", "$options": "i"}
+                })
+                
+                if existing_ai:
+                    return {
+                        "collection_name": existing_ai["name"],
+                        "reason": f"AI suggested based on content",
+                        "is_new": False,
+                        "existing_collection_id": existing_ai["id"]
+                    }
+                
+                return {
+                    "collection_name": ai_suggestion,
+                    "reason": f"AI suggested based on content",
+                    "is_new": True,
+                    "existing_collection_id": None
+                }
+        
+        return {
+            "collection_name": platform_collection,
+            "reason": f"Based on {platform} content",
+            "is_new": True,
+            "existing_collection_id": None
+        }
+    except Exception as e:
+        logger.error(f"Auto-collection suggestion error: {e}")
+        return None
+
+async def generate_weekly_summary(user_id: str, items: List[dict]) -> Optional[str]:
+    """Generate weekly digest summary"""
+    try:
+        if not items:
+            return None
+        
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            return None
+        
+        # Prepare items summary
+        items_text = "\n".join([f"- {item.get('title', 'Untitled')} ({item.get('platform', 'Web')})" for item in items[:10]])
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"digest-{uuid.uuid4()}",
+            system_message="You are a helpful assistant that creates brief, encouraging weekly summaries. Keep it under 50 words, friendly and motivational."
+        ).with_model("openai", "gpt-4")
+        
+        user_message = UserMessage(
+            text=f"Create a brief weekly summary for someone who saved these items:\n{items_text}\n\nMention the themes and encourage them to review their saves."
+        )
+        
+        response = await chat.send_message(user_message)
+        return response.strip()
+    except Exception as e:
+        logger.error(f"Weekly summary error: {e}")
+        return None
+
+# ============== AI Endpoints ==============
+
+@api_router.post("/items/{item_id}/ai-summary")
+async def generate_item_summary(item_id: str, current_user: dict = Depends(get_current_user)):
+    """Generate AI summary for an item"""
+    item = await db.items.find_one({"id": item_id, "user_id": current_user["id"]})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    summary = await generate_ai_summary(item.get("title", ""), item.get("url", ""), item.get("platform", "Web"))
+    
+    if summary:
+        await db.items.update_one({"id": item_id}, {"$set": {"ai_summary": summary}})
+    
+    return {"summary": summary}
+
+@api_router.get("/items/{item_id}/suggest-collection")
+async def get_collection_suggestion(item_id: str, current_user: dict = Depends(get_current_user)):
+    """Get AI collection suggestion for an item"""
+    item = await db.items.find_one({"id": item_id, "user_id": current_user["id"]})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    suggestion = await suggest_auto_collection(
+        item.get("title", ""),
+        item.get("platform", "Web"),
+        current_user["id"]
+    )
+    
+    return suggestion or {"collection_name": "General", "reason": "Default suggestion", "is_new": True}
+
+@api_router.get("/insights", response_model=InsightsResponse)
+async def get_insights(current_user: dict = Depends(get_current_user)):
+    """Get user insights and weekly digest"""
+    user_id = current_user["id"]
+    
+    # Total items
+    total_items = await db.items.count_documents({"user_id": user_id})
+    
+    # Items this week
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    items_this_week = await db.items.count_documents({
+        "user_id": user_id,
+        "created_at": {"$gte": week_ago}
+    })
+    
+    # Top platforms
+    platform_pipeline = [
+        {"$match": {"user_id": user_id}},
+        {"$group": {"_id": "$platform", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 5}
+    ]
+    top_platforms = await db.items.aggregate(platform_pipeline).to_list(5)
+    
+    # Top tags
+    tags_pipeline = [
+        {"$match": {"user_id": user_id}},
+        {"$unwind": "$tags"},
+        {"$group": {"_id": "$tags", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 5}
+    ]
+    top_tags = await db.items.aggregate(tags_pipeline).to_list(5)
+    
+    # Collections count
+    collections_count = await db.collections.count_documents({"user_id": user_id})
+    
+    # Resurfaced items (saved 30+ days ago)
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    old_items = await db.items.find({
+        "user_id": user_id,
+        "created_at": {"$lte": thirty_days_ago}
+    }).sort("created_at", 1).limit(3).to_list(3)
+    
+    resurfaced = []
+    for item in old_items:
+        days_ago = (datetime.utcnow() - item["created_at"]).days
+        resurfaced.append({
+            "id": item["id"],
+            "title": item.get("title", "Untitled"),
+            "thumbnail_url": item.get("thumbnail_url"),
+            "platform": item.get("platform", "Web"),
+            "days_ago": days_ago,
+            "message": f"You saved this {days_ago} days ago"
+        })
+    
+    # Generate weekly summary
+    recent_items = await db.items.find({
+        "user_id": user_id,
+        "created_at": {"$gte": week_ago}
+    }).to_list(10)
+    
+    weekly_summary = await generate_weekly_summary(user_id, recent_items)
+    
+    return InsightsResponse(
+        total_items=total_items,
+        items_this_week=items_this_week,
+        top_platforms=[{"platform": p["_id"], "count": p["count"]} for p in top_platforms],
+        top_tags=[{"tag": t["_id"], "count": t["count"]} for t in top_tags],
+        collections_count=collections_count,
+        weekly_summary=weekly_summary,
+        resurfaced_items=resurfaced
+    )
+
+@api_router.get("/resurfaced")
+async def get_resurfaced_items(current_user: dict = Depends(get_current_user)):
+    """Get items to resurface (saved 30+ days ago)"""
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    
+    items = await db.items.find({
+        "user_id": current_user["id"],
+        "created_at": {"$lte": thirty_days_ago}
+    }).sort("created_at", 1).limit(5).to_list(5)
+    
+    result = []
+    for item in items:
+        days_ago = (datetime.utcnow() - item["created_at"]).days
+        result.append({
+            **SavedItemResponse(**item).dict(),
+            "days_ago": days_ago,
+            "resurface_message": f"You saved this {days_ago} days ago"
+        })
+    
+    return result
+
+# ============== User Preferences ==============
+
+@api_router.put("/users/preferences")
+async def update_preferences(preferences: UserPreferences, current_user: dict = Depends(get_current_user)):
+    """Update user preferences from onboarding"""
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {
+            "preferences": preferences.dict(),
+            "onboarding_completed": preferences.onboarding_completed
+        }}
+    )
+    return {"message": "Preferences updated"}
+
+@api_router.get("/users/preferences")
+async def get_preferences(current_user: dict = Depends(get_current_user)):
+    """Get user preferences"""
+    user = await db.users.find_one({"id": current_user["id"]})
+    return user.get("preferences", {
+        "save_types": [],
+        "usage_goals": [],
+        "onboarding_completed": False
+    })
+
 # ============== Health Check ==============
 
 @api_router.get("/")
