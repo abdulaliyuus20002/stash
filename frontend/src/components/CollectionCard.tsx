@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../hooks/useTheme';
 import { Collection } from '../types';
@@ -21,7 +21,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
   const { colors, isDark } = useTheme();
 
   return (
-    <TouchableOpacity
+    <View
       style={[
         styles.card,
         {
@@ -30,56 +30,57 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
           shadowColor: isDark ? '#000' : '#64748B',
         },
       ]}
-      onPress={onPress}
-      activeOpacity={0.7}
     >
-      <View style={[styles.iconContainer, { backgroundColor: colors.accent + '20' }]}>
-        <Ionicons name="folder" size={24} color={colors.accent} />
-      </View>
+      {/* Main content area - clickable to navigate */}
+      <Pressable 
+        style={styles.mainContent}
+        onPress={onPress}
+      >
+        <View style={[styles.iconContainer, { backgroundColor: colors.accent + '20' }]}>
+          <Ionicons name="folder" size={24} color={colors.accent} />
+        </View>
 
-      <View style={styles.content}>
-        <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-          {collection.name}
-        </Text>
-        <Text style={[styles.count, { color: colors.textMuted }]}>
-          {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'}
-        </Text>
-      </View>
+        <View style={styles.content}>
+          <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+            {collection.name}
+          </Text>
+          <Text style={[styles.count, { color: colors.textMuted }]}>
+            {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'}
+          </Text>
+        </View>
+      </Pressable>
 
+      {/* Actions area */}
       <View style={styles.actions}>
         {onEdit && (
           <TouchableOpacity 
-            onPress={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }} 
+            onPress={onEdit} 
             style={styles.actionButton}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            activeOpacity={0.6}
           >
             <Ionicons name="pencil" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         )}
         {onDelete && (
           <TouchableOpacity 
-            onPress={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }} 
+            onPress={onDelete} 
             style={styles.actionButton}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            activeOpacity={0.6}
           >
             <Ionicons name="trash-outline" size={18} color={colors.error} />
           </TouchableOpacity>
         )}
+        
+        {/* Large arrow button for navigation */}
         <TouchableOpacity 
           onPress={onPress}
-          style={styles.arrowButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={[styles.arrowButton, { backgroundColor: colors.accent + '15' }]}
+          activeOpacity={0.6}
         >
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          <Ionicons name="chevron-forward" size={22} color={colors.accent} />
         </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -95,6 +96,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+  },
+  mainContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   iconContainer: {
     width: 48,
@@ -118,13 +124,15 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   actionButton: {
-    padding: spacing.xs,
+    padding: spacing.sm,
+    borderRadius: borderRadius.sm,
   },
   arrowButton: {
-    padding: spacing.xs,
+    padding: spacing.sm,
+    borderRadius: borderRadius.md,
     marginLeft: spacing.xs,
   },
 });
