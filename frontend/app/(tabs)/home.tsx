@@ -174,15 +174,15 @@ export default function HomeScreen() {
 
         {/* Weekly Digest / AI Summary */}
         {insights?.weekly_summary && (
-          <View style={styles.section}>
+          <View style={[styles.section, isSmallScreen && styles.sectionSmall]}>
             <View style={[styles.digestCard, { backgroundColor: colors.accent + '15' }]}>
               <View style={styles.digestHeader}>
                 <View style={[styles.digestIcon, { backgroundColor: colors.accent }]}>
-                  <Ionicons name="sparkles" size={18} color={colors.primary} />
+                  <Ionicons name="sparkles" size={isSmallScreen ? 14 : 18} color={colors.primary} />
                 </View>
-                <Text style={[styles.digestTitle, { color: colors.text }]}>Weekly Insights</Text>
+                <Text style={[styles.digestTitle, { color: colors.text }, isSmallScreen && styles.digestTitleSmall]}>Weekly Insights</Text>
               </View>
-              <Text style={[styles.digestText, { color: colors.textSecondary }]}>
+              <Text style={[styles.digestText, { color: colors.textSecondary }, isSmallScreen && styles.digestTextSmall]}>
                 {insights.weekly_summary}
               </Text>
             </View>
@@ -191,17 +191,40 @@ export default function HomeScreen() {
 
         {/* Resurfaced Items - "Remember These?" */}
         {insights?.resurfaced_items && insights.resurfaced_items.length > 0 && (
-          <View style={styles.section}>
+          <View style={[styles.section, isSmallScreen && styles.sectionSmall]}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionTitleRow}>
-                <Ionicons name="time-outline" size={20} color={colors.accent} />
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Remember These?</Text>
+                <Ionicons name="time-outline" size={isSmallScreen ? 16 : 20} color={colors.accent} />
+                <Text style={[styles.sectionTitle, { color: colors.text }, isSmallScreen && styles.sectionTitleSmall]}>Remember These?</Text>
               </View>
             </View>
             {insights.resurfaced_items.slice(0, 2).map((item) => (
               <TouchableOpacity
                 key={item.id}
                 style={[styles.resurfacedCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+                onPress={() => router.push(`/item/${item.id}`)}
+                activeOpacity={0.7}
+              >
+                {item.thumbnail_url ? (
+                  <Image source={{ uri: item.thumbnail_url }} style={[styles.resurfacedImage, isSmallScreen && styles.resurfacedImageSmall]} />
+                ) : (
+                  <View style={[styles.resurfacedImagePlaceholder, { backgroundColor: colors.inputBg }, isSmallScreen && styles.resurfacedImageSmall]}>
+                    <Ionicons name="image-outline" size={isSmallScreen ? 16 : 20} color={colors.textMuted} />
+                  </View>
+                )}
+                <View style={styles.resurfacedContent}>
+                  <Text style={[styles.resurfacedTitle, { color: colors.text }, isSmallScreen && styles.resurfacedTitleSmall]} numberOfLines={2}>
+                    {item.title}
+                  </Text>
+                  <Text style={[styles.resurfacedDays, { color: colors.accent }, isSmallScreen && styles.resurfacedDaysSmall]}>
+                    {item.message}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={isSmallScreen ? 16 : 18} color={colors.textMuted} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
                 onPress={() => router.push(`/item/${item.id}`)}
               >
                 {item.thumbnail_url ? (
