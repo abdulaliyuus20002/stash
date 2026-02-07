@@ -25,6 +25,27 @@ import { spacing, typography, borderRadius } from '@/src/utils/theme';
 import { format } from 'date-fns';
 import { API_URL } from '@/src/utils/config';
 
+interface ExtractedIdea {
+  title: string;
+  description?: string;
+  type?: string;
+}
+
+interface SmartTag {
+  name: string;
+  confidence: string;
+  cluster: string;
+  is_new: boolean;
+}
+
+interface ActionItem {
+  task: string;
+  priority?: string;
+  estimated_time?: string;
+  category?: string;
+  completed: boolean;
+}
+
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -41,8 +62,17 @@ export default function ItemDetailScreen() {
   const [tagInput, setTagInput] = useState('');
   const [showCollections, setShowCollections] = useState(false);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  
+  // AI Features State
   const [aiSummary, setAiSummary] = useState<string[]>([]);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [extractedIdeas, setExtractedIdeas] = useState<ExtractedIdea[]>([]);
+  const [isExtractingIdeas, setIsExtractingIdeas] = useState(false);
+  const [smartTags, setSmartTags] = useState<SmartTag[]>([]);
+  const [isGeneratingTags, setIsGeneratingTags] = useState(false);
+  const [actionItems, setActionItems] = useState<ActionItem[]>([]);
+  const [isGeneratingActions, setIsGeneratingActions] = useState(false);
+  const [showAIPanel, setShowAIPanel] = useState(true);
   const [collectionSuggestion, setCollectionSuggestion] = useState<{collection_name: string; reason: string} | null>(null);
 
   useEffect(() => {
