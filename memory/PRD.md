@@ -162,19 +162,24 @@ Build a cross-platform mobile app (iOS + Android) called "Stash" for saving and 
 
 ### Free Plan
 - Max 5 collections
-- Max 50 items
+- Max 50 saves (items)
 - Basic search only
+- **Psychological Trigger**: At 45+ saves, user sees subtle upgrade banner:
+  - "You're close to your 50-save limit. Upgrade to keep building your vault."
+  - Progress bar showing usage (e.g., 47/50 saves)
+  - Dismissible but reappears on refresh
 - No vault export
 - No smart reminders
-- No advanced AI features
+- Free forever
 
 ### Pro Plan
+- Unlimited saves
 - Unlimited collections
-- Unlimited items
-- Advanced search
+- Advanced search (within notes & tags)
+- Smart resurfacing reminders
 - Vault export
-- Smart reminders
-- Full AI features access
+- Future AI features
+- Priority performance
 
 ## File Structure
 ```
