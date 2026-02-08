@@ -58,7 +58,10 @@ export default function CollectionsScreen() {
         Alert.alert(
           'Collection Limit Reached',
           `Free plan is limited to ${maxCollections} collections. Upgrade to Pro for unlimited collections.`,
-          [{ text: 'OK' }]
+          [
+            { text: 'Not Now', style: 'cancel' },
+            { text: 'Go Pro', onPress: () => router.push('/upgrade') }
+          ]
         );
         return;
       }

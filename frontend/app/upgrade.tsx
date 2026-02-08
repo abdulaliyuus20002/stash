@@ -68,6 +68,16 @@ export default function UpgradeScreen() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
+      // Refresh user state with updated plan
+      const userResponse = await axios.get(`${API_URL}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Update auth store with refreshed user data
+      useAuthStore.setState({ 
+        user: { ...userResponse.data, is_pro: true, plan_type: 'pro' } 
+      });
+      
       Alert.alert(
         '🎉 Welcome to Pro!',
         'You now have access to all premium features.',
