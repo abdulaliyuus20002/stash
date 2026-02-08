@@ -692,4 +692,67 @@ const styles = StyleSheet.create({
   resurfacedDaysSmall: {
     fontSize: 10,
   },
+  // Upgrade Nudge Banner styles
+  nudgeBanner: {
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+  },
+  nudgeContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+  },
+  nudgeIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nudgeTextContainer: {
+    flex: 1,
+  },
+  nudgeMessage: {
+    fontSize: typography.body.fontSize,
+    fontWeight: '500',
+    lineHeight: 20,
+    marginBottom: spacing.sm,
+  },
+  nudgeProgressContainer: {
+    gap: spacing.xs,
+  },
+  nudgeProgressBg: {
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  nudgeProgressFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  nudgeProgressText: {
+    fontSize: typography.caption.fontSize,
+  },
+  nudgeActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: spacing.md,
+    gap: spacing.md,
+  },
+  nudgeUpgradeBtn: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+  },
+  nudgeUpgradeText: {
+    fontSize: typography.body.fontSize,
+    fontWeight: '600',
+  },
+  nudgeDismiss: {
+    padding: spacing.xs,
+  },
 });
