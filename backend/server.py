@@ -1105,6 +1105,273 @@ async def get_preferences(current_user: dict = Depends(get_current_user)):
         "onboarding_completed": False
     })
 
+# ============== Pro Subscription ==============
+
+@api_router.get("/users/plan")
+async def get_user_plan(current_user: dict = Depends(get_current_user)):
+    """Get user's current plan and limits"""
+    user = await db.users.find_one({"id": current_user["id"]})
+    is_pro = user.get("is_pro", False) or user.get("plan_type") == "pro"
+    
+    # Count current usage
+    items_count = await db.items.count_documents({"user_id": current_user["id"]})
+    collections_count = await db.collections.count_documents({"user_id": current_user["id"]})
+    
+    limits = get_user_limits(user)
+    
+    return {
+        "plan_type": "pro" if is_pro else "free",
+        "is_pro": is_pro,
+        "pro_expires_at": user.get("pro_expires_at"),
+        "limits": limits,
+        "usage": {
+            "items_count": items_count,
+            "collections_count": collections_count,
+            "items_limit": limits["max_items"],
+            "collections_limit": limits["max_collections"],
+        },
+        "features": {
+            "unlimited_collections": is_pro,
+            "advanced_search": is_pro,
+            "smart_reminders": is_pro,
+            "vault_export": is_pro,
+            "ai_features": is_pro,
+        }
+    }
+
+@api_router.post("/users/upgrade-pro")
+async def upgrade_to_pro(current_user: dict = Depends(get_current_user)):
+    """Upgrade user to Pro plan (simulated - in production use payment provider)"""
+    # In production, this would integrate with Stripe/RevenueCat
+    # For now, we'll simulate the upgrade
+    pro_expires_at = datetime.utcnow() + timedelta(days=30)  # 30-day subscription
+    
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {
+            "is_pro": True,
+            "plan_type": "pro",
+            "pro_expires_at": pro_expires_at
+        }}
+    )
+    
+    return {
+        "message": "Successfully upgraded to Pro!",
+        "plan_type": "pro",
+        "pro_expires_at": pro_expires_at
+    }
+
+@api_router.post("/users/cancel-pro")
+async def cancel_pro(current_user: dict = Depends(get_current_user)):
+    """Cancel Pro subscription"""
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {
+            "is_pro": False,
+            "plan_type": "free",
+            "pro_expires_at": None
+        }}
+    )
+    
+    return {"message": "Pro subscription cancelled", "plan_type": "free"}
+
+# ============== Advanced Search (Pro Feature) ==============
+
+@api_router.get("/search/advanced")
+async def advanced_search(
+    q: str,
+    search_notes: bool = True,
+    search_tags: bool = True,
+    search_titles: bool = True,
+    platform: Optional[str] = None,
+    collection_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Advanced search with notes & tags - PRO FEATURE"""
+    user = await db.users.find_one({"id": current_user["id"]})
+    is_pro = user.get("is_pro", False) or user.get("plan_type") == "pro"
+    
+    if not is_pro:
+        raise HTTPException(
+            status_code=403, 
+            detail="Advanced search is a Pro feature. Upgrade to unlock."
+        )
+    
+    # Build search query
+    search_conditions = []
+    
+    if search_titles:
+        search_conditions.append({"title": {"$regex": q, "$options": "i"}})
+    if search_notes:
+        search_conditions.append({"notes": {"$regex": q, "$options": "i"}})
+    if search_tags:
+        search_conditions.append({"tags": {"$regex": q, "$options": "i"}})
+    
+    query = {
+        "user_id": current_user["id"],
+        "$or": search_conditions
+    }
+    
+    if platform:
+        query["platform"] = platform
+    if collection_id:
+        query["collections"] = collection_id
+    
+    items = await db.items.find(query).sort("created_at", -1).to_list(100)
+    
+    return {
+        "results": [SavedItemResponse(**item) for item in items],
+        "total": len(items),
+        "search_in": {
+            "titles": search_titles,
+            "notes": search_notes,
+            "tags": search_tags
+        }
+    }
+
+# ============== Vault Export (Pro Feature) ==============
+
+@api_router.get("/export/vault")
+async def export_vault(current_user: dict = Depends(get_current_user)):
+    """Export all user data - PRO FEATURE"""
+    user = await db.users.find_one({"id": current_user["id"]})
+    is_pro = user.get("is_pro", False) or user.get("plan_type") == "pro"
+    
+    if not is_pro:
+        raise HTTPException(
+            status_code=403, 
+            detail="Vault export is a Pro feature. Upgrade to unlock."
+        )
+    
+    # Get all user data
+    items = await db.items.find({"user_id": current_user["id"]}).to_list(1000)
+    collections = await db.collections.find({"user_id": current_user["id"]}).to_list(100)
+    
+    # Prepare export data
+    export_data = {
+        "exported_at": datetime.utcnow().isoformat(),
+        "user": {
+            "email": user.get("email"),
+            "name": user.get("name"),
+            "created_at": user.get("created_at").isoformat() if user.get("created_at") else None,
+        },
+        "statistics": {
+            "total_items": len(items),
+            "total_collections": len(collections),
+        },
+        "collections": [
+            {
+                "id": c["id"],
+                "name": c["name"],
+                "created_at": c["created_at"].isoformat() if c.get("created_at") else None,
+            }
+            for c in collections
+        ],
+        "items": [
+            {
+                "id": item["id"],
+                "url": item.get("url"),
+                "title": item.get("title"),
+                "platform": item.get("platform"),
+                "notes": item.get("notes"),
+                "tags": item.get("tags", []),
+                "collections": item.get("collections", []),
+                "created_at": item["created_at"].isoformat() if item.get("created_at") else None,
+                "ai_summary": item.get("ai_summary"),
+                "action_items": item.get("action_items"),
+            }
+            for item in items
+        ]
+    }
+    
+    return export_data
+
+# ============== Smart Reminders (Pro Feature) ==============
+
+@api_router.get("/reminders")
+async def get_smart_reminders(current_user: dict = Depends(get_current_user)):
+    """Get smart resurfacing reminders - PRO FEATURE"""
+    user = await db.users.find_one({"id": current_user["id"]})
+    is_pro = user.get("is_pro", False) or user.get("plan_type") == "pro"
+    
+    if not is_pro:
+        raise HTTPException(
+            status_code=403, 
+            detail="Smart reminders is a Pro feature. Upgrade to unlock."
+        )
+    
+    reminders = []
+    
+    # Items saved 7 days ago (weekly review)
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    week_ago_start = week_ago.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_ago_end = week_ago.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    weekly_items = await db.items.find({
+        "user_id": current_user["id"],
+        "created_at": {"$gte": week_ago_start, "$lte": week_ago_end}
+    }).to_list(5)
+    
+    if weekly_items:
+        reminders.append({
+            "type": "weekly_review",
+            "title": "Weekly Review",
+            "message": f"You saved {len(weekly_items)} items exactly a week ago. Time to review!",
+            "items": [{"id": i["id"], "title": i.get("title", "Untitled")} for i in weekly_items],
+            "priority": "medium"
+        })
+    
+    # Items with incomplete action items
+    items_with_actions = await db.items.find({
+        "user_id": current_user["id"],
+        "action_items": {"$exists": True, "$ne": []},
+    }).to_list(100)
+    
+    incomplete_actions = []
+    for item in items_with_actions:
+        actions = item.get("action_items", [])
+        incomplete = [a for a in actions if not a.get("completed", False)]
+        if incomplete:
+            incomplete_actions.append({
+                "item_id": item["id"],
+                "item_title": item.get("title", "Untitled"),
+                "pending_tasks": len(incomplete)
+            })
+    
+    if incomplete_actions:
+        reminders.append({
+            "type": "pending_actions",
+            "title": "Pending Action Items",
+            "message": f"You have pending tasks on {len(incomplete_actions)} saved items.",
+            "items": incomplete_actions[:5],
+            "priority": "high"
+        })
+    
+    # Items saved 30+ days ago (resurface)
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    old_items = await db.items.find({
+        "user_id": current_user["id"],
+        "created_at": {"$lte": thirty_days_ago}
+    }).sort("created_at", 1).limit(5).to_list(5)
+    
+    if old_items:
+        reminders.append({
+            "type": "resurface",
+            "title": "Forgotten Gems",
+            "message": "These items from your vault might be worth revisiting.",
+            "items": [
+                {
+                    "id": i["id"], 
+                    "title": i.get("title", "Untitled"),
+                    "days_ago": (datetime.utcnow() - i["created_at"]).days
+                } 
+                for i in old_items
+            ],
+            "priority": "low"
+        })
+    
+    return {"reminders": reminders, "total": len(reminders)}
+
 # ============== Health Check ==============
 
 @api_router.get("/")
