@@ -132,6 +132,64 @@ export default function HomeScreen() {
   const recentItems = items.slice(0, 3);
   const isLoading = itemsLoading || collectionsLoading;
 
+  // Show upgrade nudge when user approaches limit
+  const showUpgradeNudge = planInfo?.approaching_limit && planInfo?.upgrade_nudge && !nudgeDismissed && !planInfo?.is_pro;
+
+  const renderUpgradeNudgeBanner = () => {
+    if (!showUpgradeNudge || !planInfo?.upgrade_nudge) return null;
+    
+    const { message, current, limit, remaining } = planInfo.upgrade_nudge;
+    
+    return (
+      <TouchableOpacity
+        style={[styles.nudgeBanner, { backgroundColor: colors.accent + '15', borderColor: colors.accent }]}
+        onPress={() => router.push('/upgrade')}
+        activeOpacity={0.8}
+      >
+        <View style={styles.nudgeContent}>
+          <View style={[styles.nudgeIconContainer, { backgroundColor: colors.accent }]}>
+            <Ionicons name="diamond" size={16} color={colors.primary} />
+          </View>
+          <View style={styles.nudgeTextContainer}>
+            <Text style={[styles.nudgeMessage, { color: colors.text }]} numberOfLines={2}>
+              {message}
+            </Text>
+            <View style={styles.nudgeProgressContainer}>
+              <View style={[styles.nudgeProgressBg, { backgroundColor: colors.border }]}>
+                <View 
+                  style={[
+                    styles.nudgeProgressFill, 
+                    { backgroundColor: colors.accent, width: `${(current / limit) * 100}%` }
+                  ]} 
+                />
+              </View>
+              <Text style={[styles.nudgeProgressText, { color: colors.textSecondary }]}>
+                {current}/{limit} saves
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.nudgeActions}>
+          <TouchableOpacity
+            style={[styles.nudgeUpgradeBtn, { backgroundColor: colors.accent }]}
+            onPress={() => router.push('/upgrade')}
+          >
+            <Text style={[styles.nudgeUpgradeText, { color: colors.primary }]}>Upgrade</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.nudgeDismiss}
+            onPress={(e) => {
+              e.stopPropagation();
+              setNudgeDismissed(true);
+            }}
+          >
+            <Ionicons name="close" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['left', 'right']}>
       <ScrollView
