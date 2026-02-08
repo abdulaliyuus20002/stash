@@ -20,6 +20,11 @@ import { API_URL } from '@/src/utils/config';
 const PRO_FEATURES = [
   {
     icon: 'infinite-outline',
+    title: 'Unlimited saves',
+    description: 'Save without limits forever',
+  },
+  {
+    icon: 'folder-outline',
     title: 'Unlimited collections',
     description: 'Organize without limits',
   },
@@ -30,23 +35,18 @@ const PRO_FEATURES = [
   },
   {
     icon: 'notifications-outline',
-    title: 'Smart resurfacing reminders',
+    title: 'Smart resurfacing',
     description: 'Never forget saved content',
   },
   {
-    icon: 'download-outline',
-    title: 'Vault export',
-    description: 'Backup your data anytime',
-  },
-  {
     icon: 'sparkles',
-    title: 'AI Power Tools',
-    description: 'Summaries, ideas & action items',
+    title: 'Future AI features',
+    description: 'First access to new AI tools',
   },
   {
     icon: 'flash-outline',
     title: 'Priority performance',
-    description: 'Faster sync & future features',
+    description: 'Faster sync & premium support',
   },
 ];
 
