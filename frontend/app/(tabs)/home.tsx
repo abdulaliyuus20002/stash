@@ -214,6 +214,9 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Upgrade Nudge Banner - Psychological Trigger at 45+ saves */}
+        {renderUpgradeNudgeBanner()}
+
         {/* Stats Cards */}
         <View style={[styles.statsContainer, isSmallScreen && styles.statsContainerSmall]}>
           <TouchableOpacity
