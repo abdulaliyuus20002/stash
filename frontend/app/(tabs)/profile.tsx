@@ -1,14 +1,86 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useAuthStore } from '@/src/store/authStore';
 import { spacing, typography, borderRadius } from '@/src/utils/theme';
+import axios from 'axios';
+import { API_URL } from '@/src/utils/config';
+
+interface PlanInfo {
+  plan_type: string;
+  is_pro: boolean;
+  usage: {
+    items_count: number;
+    collections_count: number;
+    items_limit: number;
+    collections_limit: number;
+  };
+  features: {
+    unlimited_collections: boolean;
+    advanced_search: boolean;
+    smart_reminders: boolean;
+    vault_export: boolean;
+    ai_features: boolean;
+  };
+}
 
 export default function ProfileScreen() {
   const { colors } = useTheme();
   const { user, logout } = useAuthStore();
+  const router = useRouter();
+  const token = useAuthStore((state) => state.token);
+  const [planInfo, setPlanInfo] = useState<PlanInfo | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  useEffect(() => {
+    if (token) {
+      fetchPlanInfo();
+    }
+  }, [token]);
+
+  const fetchPlanInfo = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/users/plan`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPlanInfo(response.data);
+    } catch (error) {
+      console.log('Plan fetch error:', error);
+    }
+  };
+
+  const handleExport = async () => {
+    if (!planInfo?.is_pro) {
+      Alert.alert(
+        'Pro Feature',
+        'Vault export is available for Pro users. Upgrade to export your data.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Upgrade', onPress: () => router.push('/upgrade') }
+        ]
+      );
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/export/vault`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      Alert.alert(
+        'Export Ready',
+        `Your vault has been exported: ${response.data.statistics.total_items} items and ${response.data.statistics.total_collections} collections.`,
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to export vault.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -25,6 +97,8 @@ export default function ProfileScreen() {
     );
   };
 
+  const isPro = planInfo?.is_pro || user?.plan_type === 'pro';
+
   const menuItems = [
     {
       icon: 'person-outline',
@@ -35,9 +109,18 @@ export default function ProfileScreen() {
     {
       icon: 'diamond-outline',
       title: 'Plan',
-      subtitle: user?.plan_type === 'pro' ? 'Pro' : 'Free',
-      badge: user?.plan_type !== 'pro' ? 'Upgrade' : undefined,
-      onPress: () => {},
+      subtitle: isPro ? 'Pro' : 'Free',
+      badge: !isPro ? 'Upgrade' : undefined,
+      onPress: () => router.push('/upgrade'),
+      highlight: !isPro,
+    },
+    {
+      icon: 'download-outline',
+      title: 'Export Vault',
+      subtitle: isPro ? 'Backup your data' : 'Pro feature',
+      badge: !isPro ? 'PRO' : undefined,
+      onPress: handleExport,
+      loading: isExporting,
     },
     {
       icon: 'color-palette-outline',
@@ -48,8 +131,16 @@ export default function ProfileScreen() {
     {
       icon: 'notifications-outline',
       title: 'Notifications',
-      subtitle: 'Manage preferences',
-      onPress: () => {},
+      subtitle: isPro ? 'Smart reminders on' : 'Pro feature',
+      badge: !isPro ? 'PRO' : undefined,
+      onPress: () => {
+        if (!isPro) {
+          Alert.alert('Pro Feature', 'Smart reminders are available for Pro users.', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Upgrade', onPress: () => router.push('/upgrade') }
+          ]);
+        }
+      },
     },
     {
       icon: 'shield-checkmark-outline',
@@ -80,17 +171,55 @@ export default function ProfileScreen() {
           <Text style={[styles.userEmail, { color: colors.textSecondary }]}>
             {user?.email}
           </Text>
-          <View style={[styles.planBadge, { backgroundColor: colors.accent + '20' }]}>
+          <TouchableOpacity 
+            style={[
+              styles.planBadge, 
+              { backgroundColor: isPro ? colors.accent : colors.accent + '20' }
+            ]}
+            onPress={() => !isPro && router.push('/upgrade')}
+          >
             <Ionicons
-              name={user?.plan_type === 'pro' ? 'diamond' : 'sparkles-outline'}
+              name={isPro ? 'diamond' : 'sparkles-outline'}
               size={14}
-              color={colors.accent}
+              color={isPro ? colors.primary : colors.accent}
             />
-            <Text style={[styles.planText, { color: colors.accent }]}>
-              {user?.plan_type === 'pro' ? 'Pro Plan' : 'Free Plan'}
+            <Text style={[styles.planText, { color: isPro ? colors.primary : colors.accent }]}>
+              {isPro ? 'Pro Plan' : 'Free Plan'}
             </Text>
-          </View>
+            {!isPro && (
+              <Ionicons name="chevron-forward" size={14} color={colors.accent} />
+            )}
+          </TouchableOpacity>
         </View>
+
+        {/* Usage Stats for Free Users */}
+        {!isPro && planInfo && (
+          <View style={[styles.usageCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.usageTitle, { color: colors.text }]}>Usage</Text>
+            <View style={styles.usageRow}>
+              <View style={styles.usageItem}>
+                <Text style={[styles.usageCount, { color: colors.text }]}>
+                  {planInfo.usage.items_count}/{planInfo.usage.items_limit === -1 ? '∞' : planInfo.usage.items_limit}
+                </Text>
+                <Text style={[styles.usageLabel, { color: colors.textMuted }]}>Items</Text>
+              </View>
+              <View style={[styles.usageDivider, { backgroundColor: colors.border }]} />
+              <View style={styles.usageItem}>
+                <Text style={[styles.usageCount, { color: colors.text }]}>
+                  {planInfo.usage.collections_count}/{planInfo.usage.collections_limit === -1 ? '∞' : planInfo.usage.collections_limit}
+                </Text>
+                <Text style={[styles.usageLabel, { color: colors.textMuted }]}>Collections</Text>
+              </View>
+            </View>
+            <TouchableOpacity 
+              style={[styles.upgradeButton, { backgroundColor: colors.accent }]}
+              onPress={() => router.push('/upgrade')}
+            >
+              <Ionicons name="diamond" size={16} color={colors.primary} />
+              <Text style={[styles.upgradeText, { color: colors.primary }]}>Upgrade for Unlimited</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Menu Items */}
         <View style={styles.menuSection}>
@@ -99,13 +228,13 @@ export default function ProfileScreen() {
               key={index}
               style={[
                 styles.menuItem,
-                { backgroundColor: colors.card, borderColor: colors.border },
+                { backgroundColor: colors.card, borderColor: item.highlight ? colors.accent : colors.border },
               ]}
               onPress={item.onPress}
               activeOpacity={0.7}
             >
-              <View style={[styles.menuIcon, { backgroundColor: colors.inputBg }]}>
-                <Ionicons name={item.icon as any} size={20} color={colors.textSecondary} />
+              <View style={[styles.menuIcon, { backgroundColor: item.highlight ? colors.accent + '20' : colors.inputBg }]}>
+                <Ionicons name={item.icon as any} size={20} color={item.highlight ? colors.accent : colors.textSecondary} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={[styles.menuTitle, { color: colors.text }]}>{item.title}</Text>
@@ -115,14 +244,20 @@ export default function ProfileScreen() {
                   </Text>
                 )}
               </View>
-              {item.badge && (
-                <View style={[styles.badge, { backgroundColor: colors.accent }]}>
-                  <Text style={[styles.badgeText, { color: colors.primary }]}>
-                    {item.badge}
-                  </Text>
-                </View>
+              {item.loading ? (
+                <ActivityIndicator size="small" color={colors.accent} />
+              ) : (
+                <>
+                  {item.badge && (
+                    <View style={[styles.badge, { backgroundColor: item.badge === 'PRO' ? colors.textMuted : colors.accent }]}>
+                      <Text style={[styles.badgeText, { color: colors.primary }]}>
+                        {item.badge}
+                      </Text>
+                    </View>
+                  )}
+                  <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                </>
               )}
-              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </TouchableOpacity>
           ))}
         </View>
@@ -179,12 +314,57 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
     gap: spacing.xs,
   },
   planText: {
     fontSize: typography.bodySmall.fontSize,
+    fontWeight: '600',
+  },
+  usageCard: {
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+  },
+  usageTitle: {
+    fontSize: typography.body.fontSize,
+    fontWeight: '600',
+    marginBottom: spacing.md,
+  },
+  usageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  usageItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  usageCount: {
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  usageLabel: {
+    fontSize: typography.caption.fontSize,
+    marginTop: 2,
+  },
+  usageDivider: {
+    width: 1,
+    height: 40,
+  },
+  upgradeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    gap: spacing.sm,
+  },
+  upgradeText: {
+    fontSize: typography.body.fontSize,
     fontWeight: '600',
   },
   menuSection: {
