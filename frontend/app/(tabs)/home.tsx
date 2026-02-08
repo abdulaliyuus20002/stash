@@ -40,6 +40,25 @@ interface InsightsData {
   }[];
 }
 
+interface PlanInfo {
+  plan_type: string;
+  is_pro: boolean;
+  usage: {
+    items_count: number;
+    collections_count: number;
+    items_limit: number;
+    collections_limit: number;
+  };
+  approaching_limit: boolean;
+  upgrade_nudge: {
+    type: string;
+    message: string;
+    current: number;
+    limit: number;
+    remaining: number;
+  } | null;
+}
+
 export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
@@ -50,6 +69,8 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [insights, setInsights] = useState<InsightsData | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
+  const [planInfo, setPlanInfo] = useState<PlanInfo | null>(null);
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
   
   // Responsive dimensions
   const { width } = useWindowDimensions();
@@ -72,18 +93,32 @@ export default function HomeScreen() {
     }
   }, [token]);
 
+  const fetchPlanInfo = useCallback(async () => {
+    if (!token) return;
+    try {
+      const response = await axios.get(`${API_URL}/api/users/plan`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPlanInfo(response.data);
+    } catch (error) {
+      console.log('Plan info fetch error:', error);
+    }
+  }, [token]);
+
   useEffect(() => {
     if (token) {
       fetchItems(token);
       fetchCollections(token);
       fetchInsights();
+      fetchPlanInfo();
     }
   }, [token]);
 
   const onRefresh = async () => {
     if (!token) return;
     setRefreshing(true);
-    await Promise.all([fetchItems(token), fetchCollections(token), fetchInsights()]);
+    setNudgeDismissed(false); // Reset nudge on refresh
+    await Promise.all([fetchItems(token), fetchCollections(token), fetchInsights(), fetchPlanInfo()]);
     setRefreshing(false);
   };
 
