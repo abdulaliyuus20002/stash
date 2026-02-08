@@ -129,7 +129,7 @@ export default function HomeScreen() {
               { backgroundColor: colors.card, borderColor: colors.border },
               isSmallScreen && styles.statCardSmall
             ]}
-            onPress={() => router.push('/(tabs)/index')}
+            onPress={() => router.replace('/(tabs)')}
             activeOpacity={0.7}
           >
             <View style={[styles.statIconContainer, { backgroundColor: colors.accent + '20' }, isSmallScreen && styles.statIconSmall]}>
