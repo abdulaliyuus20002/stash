@@ -65,12 +65,39 @@ class UserResponse(BaseModel):
     email: str
     name: Optional[str] = None
     plan_type: str = "free"
+    is_pro: bool = False
+    pro_expires_at: Optional[datetime] = None
     created_at: datetime
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+# Plan limits
+FREE_PLAN_LIMITS = {
+    "max_collections": 5,
+    "max_items": 50,
+    "advanced_search": False,
+    "smart_reminders": False,
+    "vault_export": False,
+    "ai_features": False,
+}
+
+PRO_PLAN_LIMITS = {
+    "max_collections": -1,  # Unlimited
+    "max_items": -1,  # Unlimited
+    "advanced_search": True,
+    "smart_reminders": True,
+    "vault_export": True,
+    "ai_features": True,
+}
+
+def get_user_limits(user: dict) -> dict:
+    """Get limits based on user's plan"""
+    if user.get("is_pro") or user.get("plan_type") == "pro":
+        return PRO_PLAN_LIMITS
+    return FREE_PLAN_LIMITS
 
 class SavedItemCreate(BaseModel):
     url: str
