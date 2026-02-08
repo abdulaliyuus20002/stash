@@ -129,7 +129,7 @@ export default function HomeScreen() {
               { backgroundColor: colors.card, borderColor: colors.border },
               isSmallScreen && styles.statCardSmall
             ]}
-            onPress={() => router.navigate('/index')}
+            onPress={() => router.push('/inbox')}
             activeOpacity={0.7}
           >
             <View style={[styles.statIconContainer, { backgroundColor: colors.accent + '20' }, isSmallScreen && styles.statIconSmall]}>
@@ -145,7 +145,7 @@ export default function HomeScreen() {
               { backgroundColor: colors.card, borderColor: colors.border },
               isSmallScreen && styles.statCardSmall
             ]}
-            onPress={() => router.push('/(tabs)/collections')}
+            onPress={() => router.push('/collections')}
             activeOpacity={0.7}
           >
             <View style={[styles.statIconContainer, { backgroundColor: colors.accent + '20' }, isSmallScreen && styles.statIconSmall]}>
