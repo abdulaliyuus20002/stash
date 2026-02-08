@@ -93,6 +93,9 @@ PRO_PLAN_LIMITS = {
     "ai_features": True,
 }
 
+# Threshold for upgrade nudge
+ITEMS_WARNING_THRESHOLD = 45
+
 def get_user_limits(user: dict) -> dict:
     """Get limits based on user's plan"""
     if user.get("is_pro") or user.get("plan_type") == "pro":
@@ -381,6 +384,16 @@ async def extract_metadata(data: dict, current_user: dict = Depends(get_current_
 
 @api_router.post("/items", response_model=SavedItemResponse)
 async def create_item(item_data: SavedItemCreate, current_user: dict = Depends(get_current_user)):
+    # Check item limit for free users
+    is_pro = current_user.get("is_pro", False) or current_user.get("plan_type") == "pro"
+    if not is_pro:
+        items_count = await db.items.count_documents({"user_id": current_user["id"]})
+        if items_count >= FREE_PLAN_LIMITS["max_items"]:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Free plan limited to {FREE_PLAN_LIMITS['max_items']} saves. Upgrade to Pro for unlimited saves."
+            )
+    
     # Fetch metadata if not provided
     if not item_data.title or not item_data.platform:
         metadata = await fetch_url_metadata(item_data.url)
@@ -1119,6 +1132,31 @@ async def get_user_plan(current_user: dict = Depends(get_current_user)):
     
     limits = get_user_limits(user)
     
+    # Check if user is approaching limit (for upgrade nudge)
+    approaching_limit = False
+    upgrade_nudge = None
+    
+    if not is_pro:
+        if items_count >= ITEMS_WARNING_THRESHOLD:
+            approaching_limit = True
+            remaining = limits["max_items"] - items_count
+            upgrade_nudge = {
+                "type": "items_limit",
+                "message": f"You're close to your {limits['max_items']}-save limit. Upgrade to keep building your vault.",
+                "current": items_count,
+                "limit": limits["max_items"],
+                "remaining": remaining
+            }
+        elif collections_count >= limits["max_collections"]:
+            approaching_limit = True
+            upgrade_nudge = {
+                "type": "collections_limit", 
+                "message": f"You've reached your {limits['max_collections']} collection limit. Upgrade for unlimited collections.",
+                "current": collections_count,
+                "limit": limits["max_collections"],
+                "remaining": 0
+            }
+    
     return {
         "plan_type": "pro" if is_pro else "free",
         "is_pro": is_pro,
@@ -1136,7 +1174,9 @@ async def get_user_plan(current_user: dict = Depends(get_current_user)):
             "smart_reminders": is_pro,
             "vault_export": is_pro,
             "ai_features": is_pro,
-        }
+        },
+        "approaching_limit": approaching_limit,
+        "upgrade_nudge": upgrade_nudge
     }
 
 @api_router.post("/users/upgrade-pro")
