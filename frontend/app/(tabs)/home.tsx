@@ -363,7 +363,7 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Items</Text>
             {items.length > 0 && (
-              <TouchableOpacity onPress={() => router.push('/(tabs)/index')}>
+              <TouchableOpacity onPress={() => router.push('/(tabs)/inbox')}>
                 <Text style={[styles.seeAll, { color: colors.accent }]}>See All</Text>
               </TouchableOpacity>
             )}
