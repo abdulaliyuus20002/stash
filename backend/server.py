@@ -566,7 +566,8 @@ async def search_items(q: str, current_user: dict = Depends(get_current_user)):
         ]
     }
     
-    items = await db.items.find(query).sort("created_at", -1).to_list(100)
+    # Projection for optimized query - exclude _id
+    items = await db.items.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
     return [SavedItemResponse(**item) for item in items]
 
 # ============== Tags Route ==============
