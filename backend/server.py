@@ -501,21 +501,33 @@ async def create_collection(data: CollectionCreate, current_user: dict = Depends
 
 @api_router.get("/collections", response_model=List[CollectionResponse])
 async def get_collections(current_user: dict = Depends(get_current_user)):
-    # Projection for optimized query - exclude _id
-    collections = await db.collections.find(
-        {"user_id": current_user["id"]}, 
-        {"_id": 0}
-    ).to_list(100)
+    # Use aggregation to get collections with item counts in single query (avoids N+1)
+    pipeline = [
+        {"$match": {"user_id": current_user["id"]}},
+        {"$lookup": {
+            "from": "items",
+            "let": {"col_id": "$id"},
+            "pipeline": [
+                {"$match": {
+                    "$expr": {
+                        "$and": [
+                            {"$eq": ["$user_id", current_user["id"]]},
+                            {"$in": ["$$col_id", {"$ifNull": ["$collections", []]}]}
+                        ]
+                    }
+                }},
+                {"$count": "count"}
+            ],
+            "as": "item_count_result"
+        }},
+        {"$addFields": {
+            "item_count": {"$ifNull": [{"$arrayElemAt": ["$item_count_result.count", 0]}, 0]}
+        }},
+        {"$project": {"_id": 0, "item_count_result": 0}}
+    ]
     
-    result = []
-    for col in collections:
-        item_count = await db.items.count_documents({
-            "user_id": current_user["id"],
-            "collections": col["id"]
-        })
-        result.append(CollectionResponse(**col, item_count=item_count))
-    
-    return result
+    collections = await db.collections.aggregate(pipeline).to_list(100)
+    return [CollectionResponse(**col) for col in collections]
 
 @api_router.put("/collections/{collection_id}", response_model=CollectionResponse)
 async def update_collection(collection_id: str, data: CollectionUpdate, current_user: dict = Depends(get_current_user)):
