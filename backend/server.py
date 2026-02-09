@@ -1264,7 +1264,8 @@ async def advanced_search(
     if collection_id:
         query["collections"] = collection_id
     
-    items = await db.items.find(query).sort("created_at", -1).to_list(100)
+    # Projection for optimized query - exclude _id
+    items = await db.items.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
     
     return {
         "results": [SavedItemResponse(**item) for item in items],
