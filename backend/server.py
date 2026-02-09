@@ -751,23 +751,20 @@ async def extract_ideas(title: str, url: str, platform: str) -> List[Dict[str, s
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         if not api_key:
+            logger.error("EMERGENT_LLM_KEY not found")
             return []
         
         chat = LlmChat(
             api_key=api_key,
             session_id=f"ideas-{uuid.uuid4()}",
             system_message="""You are an expert idea extractor. Analyze content and extract 3-5 key ideas or insights.
-For each idea, provide:
-1. A short title (3-5 words)
-2. A brief description (1 sentence)
-3. A category: "concept", "insight", "strategy", "quote", or "takeaway"
+For each idea, provide a JSON array with objects containing:
+- title: A short title (3-5 words)
+- description: A brief description (1 sentence)  
+- type: One of "concept", "insight", "strategy", "quote", or "takeaway"
 
-Format your response as:
-IDEA: [title]
-DESC: [description]
-TYPE: [category]
-
-Repeat for each idea."""
+Respond ONLY with a valid JSON array, no other text. Example:
+[{"title":"Core Concept","description":"The main idea explained.","type":"concept"}]"""
         ).with_model("openai", "gpt-4")
         
         user_message = UserMessage(
@@ -775,26 +772,44 @@ Repeat for each idea."""
         )
         
         response = await chat.send_message(user_message)
+        logger.info(f"Ideas response: {response[:200]}...")
         
-        # Parse ideas from response
-        ideas = []
-        current_idea = {}
+        # Try to parse JSON response
+        try:
+            # Clean response - remove markdown code blocks if present
+            clean_response = response.strip()
+            if clean_response.startswith("```"):
+                clean_response = clean_response.split("```")[1]
+                if clean_response.startswith("json"):
+                    clean_response = clean_response[4:]
+            clean_response = clean_response.strip()
+            
+            ideas = json.loads(clean_response)
+            if isinstance(ideas, list):
+                return ideas[:5]
+        except json.JSONDecodeError:
+            logger.warning(f"Could not parse JSON, trying text parsing")
+            # Fallback to text parsing
+            ideas = []
+            current_idea = {}
+            
+            for line in response.strip().split('\n'):
+                line = line.strip()
+                if line.startswith('IDEA:') or line.startswith('"title"'):
+                    if current_idea and current_idea.get("title"):
+                        ideas.append(current_idea)
+                    current_idea = {"title": line.replace('IDEA:', '').replace('"title":', '').strip(' ",')}
+                elif line.startswith('DESC:') or line.startswith('"description"'):
+                    current_idea["description"] = line.replace('DESC:', '').replace('"description":', '').strip(' ",')
+                elif line.startswith('TYPE:') or line.startswith('"type"'):
+                    current_idea["type"] = line.replace('TYPE:', '').replace('"type":', '').strip(' ",').lower()
+            
+            if current_idea and current_idea.get("title"):
+                ideas.append(current_idea)
+            
+            return ideas[:5]
         
-        for line in response.strip().split('\n'):
-            line = line.strip()
-            if line.startswith('IDEA:'):
-                if current_idea:
-                    ideas.append(current_idea)
-                current_idea = {"title": line[5:].strip()}
-            elif line.startswith('DESC:'):
-                current_idea["description"] = line[5:].strip()
-            elif line.startswith('TYPE:'):
-                current_idea["type"] = line[5:].strip().lower()
-        
-        if current_idea and "title" in current_idea:
-            ideas.append(current_idea)
-        
-        return ideas[:5]
+        return []
     except Exception as e:
         logger.error(f"Idea extraction error: {e}")
         return []
