@@ -3,6 +3,7 @@ export interface User {
   email: string;
   name?: string;
   plan_type: string;
+  is_pro?: boolean;
   created_at: string;
 }
 
