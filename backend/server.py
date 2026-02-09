@@ -444,7 +444,9 @@ async def get_items(
     
     sort_order = -1 if sort == "newest" else 1
     
-    items = await db.items.find(query).sort("created_at", sort_order).to_list(1000)
+    # Projection for optimized query - exclude _id, include only needed fields
+    projection = {"_id": 0}
+    items = await db.items.find(query, projection).sort("created_at", sort_order).to_list(1000)
     return [SavedItemResponse(**item) for item in items]
 
 @api_router.get("/items/{item_id}", response_model=SavedItemResponse)
