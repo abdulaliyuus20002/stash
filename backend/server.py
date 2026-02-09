@@ -501,7 +501,11 @@ async def create_collection(data: CollectionCreate, current_user: dict = Depends
 
 @api_router.get("/collections", response_model=List[CollectionResponse])
 async def get_collections(current_user: dict = Depends(get_current_user)):
-    collections = await db.collections.find({"user_id": current_user["id"]}).to_list(100)
+    # Projection for optimized query - exclude _id
+    collections = await db.collections.find(
+        {"user_id": current_user["id"]}, 
+        {"_id": 0}
+    ).to_list(100)
     
     result = []
     for col in collections:
