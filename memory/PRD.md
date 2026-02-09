@@ -216,6 +216,16 @@ Build a cross-platform mobile app (iOS + Android) called "Stash" for saving and 
 - 16 tests covering Pro subscription features
 - All tests passing (100%)
 
+## Deployment Readiness (Feb 9, 2025)
+All deployment blockers resolved:
+- ✅ requirements.txt: Added httpx, beautifulsoup4, lxml
+- ✅ Expo env: Added EXPO_PACKAGER_PROXY_URL
+- ✅ JWT Secret: Added to backend/.env
+- ✅ Database queries: Optimized with projections (exclude _id)
+- ✅ N+1 query fix: Collections endpoint uses aggregation pipeline
+- ✅ CORS: Properly configured
+- ✅ Environment variables: All URLs/credentials from .env
+
 ## Known Limitations
 1. Pro upgrade is MOCKED - no real payment integration
 2. Pro subscription duration hardcoded to 30 days
