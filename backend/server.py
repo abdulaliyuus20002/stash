@@ -1291,9 +1291,9 @@ async def export_vault(current_user: dict = Depends(get_current_user)):
             detail="Vault export is a Pro feature. Upgrade to unlock."
         )
     
-    # Get all user data
-    items = await db.items.find({"user_id": current_user["id"]}).to_list(1000)
-    collections = await db.collections.find({"user_id": current_user["id"]}).to_list(100)
+    # Get all user data with projection to exclude _id
+    items = await db.items.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(1000)
+    collections = await db.collections.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
     
     # Prepare export data
     export_data = {
