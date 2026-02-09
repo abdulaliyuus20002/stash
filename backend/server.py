@@ -1373,7 +1373,7 @@ async def get_smart_reminders(current_user: dict = Depends(get_current_user)):
     items_with_actions = await db.items.find({
         "user_id": current_user["id"],
         "action_items": {"$exists": True, "$ne": []},
-    }).to_list(100)
+    }, {"_id": 0}).to_list(100)
     
     incomplete_actions = []
     for item in items_with_actions:
