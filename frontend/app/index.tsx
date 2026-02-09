@@ -15,7 +15,7 @@ export default function WelcomeScreen() {
 
   // Redirect to tabs if already authenticated
   if (isAuthenticated) {
-    return <Redirect href="/(tabs)" />;
+    return <Redirect href="/(tabs)/home" />;
   }
 
   return (
