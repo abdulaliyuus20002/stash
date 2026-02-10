@@ -79,3 +79,7 @@ agenthub/agents/youtube/db
 # Mobile development
 android-sdk/ project.tar.gz
 project.tar.gz
+-e 
+# Environment files
+*.env
+*.env.*
