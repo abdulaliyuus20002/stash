@@ -158,28 +158,27 @@ Build a cross-platform mobile app (iOS + Android) called "Stash" for saving and 
 }
 ```
 
-## Plan Limits
+## Plan Limits (Updated Feb 11, 2025)
 
 ### Free Plan
-- Max 5 collections
-- Max 50 saves (items)
-- Basic search only
-- **Psychological Trigger**: At 45+ saves, user sees subtle upgrade banner:
-  - "You're close to your 50-save limit. Upgrade to keep building your vault."
-  - Progress bar showing usage (e.g., 47/50 saves)
-  - Dismissible but reappears on refresh
-- No vault export
-- No smart reminders
+- Max 10 collections
+- Max 500 saves (3 months of collecting)
+- Basic search (find by title)
+- 3 AI suggestions per month
+- Every device sync
+- **Psychological Trigger**: At 450+ saves, upgrade banner appears
 - Free forever
 
-### Pro Plan
-- Unlimited saves
-- Unlimited collections
+### Pro Plan - $39.99/year or $4.99/month
+- Unlimited saves & collections
 - Advanced search (within notes & tags)
+- AI suggests smart tags - user approves in 1 tap
+- AI generates summaries - on demand
+- AI recommends collections - one tap to add
 - Smart resurfacing reminders
 - Vault export
-- Future AI features
 - Priority performance
+- **Trial**: 14 days free (card required)
 
 ## File Structure
 ```
