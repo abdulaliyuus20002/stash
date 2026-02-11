@@ -3,6 +3,7 @@ export const colors = {
   primary: '#0F172A',       // Deep navy
   background: '#F8FAFC',    // Soft off-white
   accent: '#C6A75E',        // Muted gold
+  white: '#FFFFFF',         // Pure white
   
   // Text colors
   text: '#0F172A',
@@ -33,6 +34,7 @@ export const darkColors = {
   primary: '#F8FAFC',
   background: '#0F172A',
   accent: '#C6A75E',
+  white: '#FFFFFF',         // Pure white
   
   text: '#F8FAFC',
   textSecondary: '#94A3B8',
