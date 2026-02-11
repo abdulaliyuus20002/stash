@@ -136,11 +136,13 @@ export default function UpgradeScreen() {
           <View style={styles.featuresSection}>
             <FeatureBlock 
               icon="infinite-outline"
+              iconColor={colors.primary}
               title="Unlimited everything"
               description="Never count saves again."
             />
             <FeatureBlock 
               icon="sparkles-outline"
+              iconColor={colors.primary}
               title="AI that helps, not decides"
               bullets={[
                 'Smart tags — suggested, you approve',
@@ -150,6 +152,7 @@ export default function UpgradeScreen() {
             />
             <FeatureBlock 
               icon="sync-outline"
+              iconColor={colors.primary}
               title="Cross-device sync"
               description="Pick up anywhere, anytime."
             />
@@ -168,7 +171,7 @@ export default function UpgradeScreen() {
             >
               <View style={styles.planBadge}>
                 <Ionicons name="flame" size={14} color={colors.warning} />
-                <Text style={styles.planBadgeText}>BEST VALUE</Text>
+                <Text style={styles.planBadgeText}>YEARLY — Best value</Text>
               </View>
               <View style={styles.planContent}>
                 <View style={styles.planInfo}>
