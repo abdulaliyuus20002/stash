@@ -306,16 +306,17 @@ export default function UpgradeScreen() {
 }
 
 // Feature Block Component
-const FeatureBlock = ({ icon, title, description, bullets }: { 
+const FeatureBlock = ({ icon, iconColor, title, description, bullets }: { 
   icon: string; 
+  iconColor?: string;
   title: string; 
   description?: string; 
   bullets?: string[];
 }) => (
   <View style={styles.featureBlock}>
     <View style={styles.featureHeader}>
-      <View style={[styles.featureIcon, { backgroundColor: colors.primary + '12' }]}>
-        <Ionicons name={icon as any} size={20} color={colors.primary} />
+      <View style={[styles.featureIcon, { backgroundColor: (iconColor || colors.primary) + '12' }]}>
+        <Ionicons name={icon as any} size={20} color={iconColor || colors.primary} />
       </View>
       <Text style={styles.featureTitle}>{title}</Text>
     </View>
@@ -326,7 +327,7 @@ const FeatureBlock = ({ icon, title, description, bullets }: {
       <View style={styles.bulletList}>
         {bullets.map((bullet, index) => (
           <View key={index} style={styles.bulletItem}>
-            <View style={styles.bulletDot} />
+            <View style={[styles.bulletDot, { backgroundColor: colors.gray400 }]} />
             <Text style={styles.bulletText}>{bullet}</Text>
           </View>
         ))}
