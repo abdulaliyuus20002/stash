@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,44 +11,38 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/src/hooks/useTheme';
 import { useAuthStore } from '@/src/store/authStore';
-import { spacing, typography, borderRadius } from '@/src/utils/theme';
+import { spacing, borderRadius } from '@/src/utils/theme';
 import axios from 'axios';
 import { API_URL } from '@/src/utils/config';
 
-// Reduced to 3 most compelling features (reduces cognitive load)
-const PRO_FEATURES = [
-  {
-    icon: 'infinite-outline',
-    title: 'Unlimited saves & collections',
-    description: 'Never hit a limit again',
-  },
-  {
-    icon: 'notifications-outline',
-    title: 'Smart resurfacing',
-    description: 'Resurface ideas when you need them',
-  },
-  {
-    icon: 'sparkles',
-    title: 'Future AI features',
-    description: 'First access to new AI tools',
-  },
-];
-
-// Trial timeline steps
-const TRIAL_TIMELINE = [
-  { day: 'Today', description: 'Full access', icon: 'checkmark-circle' },
-  { day: 'Day 5', description: 'Reminder', icon: 'notifications-outline' },
-  { day: 'Day 7', description: '$59.99/year', icon: 'card-outline' },
-];
+// Design system colors
+const colors = {
+  primary: '#2DD4BF',
+  primaryDark: '#14B8A6',
+  gray50: '#F9FAFB',
+  gray100: '#F3F4F6',
+  gray200: '#E5E7EB',
+  gray500: '#6B7280',
+  gray700: '#374151',
+  gray900: '#111827',
+  success: '#10B981',
+  warning: '#F59E0B',
+  white: '#FFFFFF',
+};
 
 export default function UpgradeScreen() {
   const router = useRouter();
-  const { colors } = useTheme();
   const token = useAuthStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
+  const [socialProofCount, setSocialProofCount] = useState(2847);
+
+  // Simulate dynamic social proof (would come from backend)
+  useEffect(() => {
+    const randomAdd = Math.floor(Math.random() * 50);
+    setSocialProofCount(2847 + randomAdd);
+  }, []);
 
   const handleUpgrade = async () => {
     if (!token) return;
@@ -57,7 +51,7 @@ export default function UpgradeScreen() {
     try {
       const response = await axios.post(
         `${API_URL}/api/users/upgrade-pro`,
-        {},
+        { plan: selectedPlan },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -72,7 +66,7 @@ export default function UpgradeScreen() {
       });
       
       Alert.alert(
-        'Your 7-day trial has started!',
+        'Your 14-day trial has started!',
         'Enjoy full Pro access. We\'ll remind you before it ends.',
         [{ text: 'Start Exploring', onPress: () => router.back() }]
       );
@@ -81,6 +75,10 @@ export default function UpgradeScreen() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleContinueFree = () => {
+    router.back();
   };
 
   const handleRestore = () => {
@@ -105,199 +103,166 @@ export default function UpgradeScreen() {
               onPress={() => router.back()}
               style={styles.closeButton}
             >
-              <Ionicons name="close" size={24} color={colors.text} />
+              <Ionicons name="close" size={24} color={colors.gray900} />
             </TouchableOpacity>
           ),
         }}
       />
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={styles.container}>
         <ScrollView 
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
           {/* Header */}
           <View style={styles.header}>
-            <View style={[styles.proBadge, { backgroundColor: colors.accent }]}>
-              <Ionicons name="diamond" size={24} color={colors.primary} />
-            </View>
-            <Text style={[styles.title, { color: colors.text }]}>Try Stash Pro Free</Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              7 days free, then $59.99/year
-            </Text>
-          </View>
-
-          {/* Compact Features List */}
-          <View style={styles.featuresContainer}>
-            {PRO_FEATURES.map((feature, index) => (
-              <View key={index} style={styles.featureItem}>
-                <View style={[styles.featureIcon, { backgroundColor: colors.accent + '20' }]}>
-                  <Ionicons name={feature.icon as any} size={20} color={colors.accent} />
-                </View>
-                <View style={styles.featureText}>
-                  <Text style={[styles.featureTitle, { color: colors.text }]}>
-                    {feature.title}
-                  </Text>
-                  <Text style={[styles.featureDesc, { color: colors.textMuted }]}>
-                    {feature.description}
-                  </Text>
-                </View>
+            <Text style={styles.title}>✨ Try Stash Pro Free — 14 Days</Text>
+            
+            {/* Social Proof Counter */}
+            <View style={styles.socialProof}>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: '75%' }]} />
               </View>
-            ))}
+              <Text style={styles.socialProofText}>
+                <Text style={styles.socialProofNumber}>{socialProofCount.toLocaleString()}</Text> people joined this week
+              </Text>
+            </View>
           </View>
 
-          {/* Trial Timeline */}
-          <View style={[styles.timelineContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.timelineTitle, { color: colors.text }]}>How your trial works</Text>
-            <View style={styles.timeline}>
-              {TRIAL_TIMELINE.map((step, index) => (
-                <View key={index} style={styles.timelineStep}>
-                  <View style={[
-                    styles.timelineIcon, 
-                    { backgroundColor: index === 0 ? colors.accent : colors.inputBg }
-                  ]}>
-                    <Ionicons 
-                      name={step.icon as any} 
-                      size={16} 
-                      color={index === 0 ? colors.primary : colors.textMuted} 
-                    />
-                  </View>
-                  <Text style={[styles.timelineDay, { color: colors.text }]}>{step.day}</Text>
-                  <Text style={[styles.timelineDesc, { color: colors.textSecondary }]}>{step.description}</Text>
-                  {index < TRIAL_TIMELINE.length - 1 && (
-                    <View style={[styles.timelineConnector, { backgroundColor: colors.border }]} />
-                  )}
-                </View>
-              ))}
+          {/* Feature Sections */}
+          <View style={styles.featuresSection}>
+            {/* Unlimited Everything */}
+            <View style={styles.featureBlock}>
+              <View style={styles.featureHeader}>
+                <Text style={styles.featureEmoji}>📦</Text>
+                <Text style={styles.featureTitle}>Unlimited everything</Text>
+              </View>
+              <Text style={styles.featureDesc}>Never count saves again.</Text>
+            </View>
+
+            {/* AI that helps */}
+            <View style={styles.featureBlock}>
+              <View style={styles.featureHeader}>
+                <Text style={styles.featureEmoji}>🤖</Text>
+                <Text style={styles.featureTitle}>AI that helps, not decides</Text>
+              </View>
+              <View style={styles.featureList}>
+                <Text style={styles.featureListItem}>• Smart tags — suggested, you approve</Text>
+                <Text style={styles.featureListItem}>• AI summaries — generate when you need them</Text>
+                <Text style={styles.featureListItem}>• Collection recommendations — one tap to add</Text>
+              </View>
+            </View>
+
+            {/* Cross-device sync */}
+            <View style={styles.featureBlock}>
+              <View style={styles.featureHeader}>
+                <Text style={styles.featureEmoji}>🔄</Text>
+                <Text style={styles.featureTitle}>Cross-device sync</Text>
+              </View>
+              <Text style={styles.featureDesc}>Pick up anywhere, anytime.</Text>
             </View>
           </View>
 
           {/* Pricing Plans */}
           <View style={styles.plansContainer}>
-            {/* Yearly Plan - Recommended */}
+            {/* Yearly Plan - Best Value */}
             <TouchableOpacity
               style={[
                 styles.planCard,
-                styles.yearlyPlan,
-                {
-                  backgroundColor: selectedPlan === 'yearly' ? colors.accent + '10' : colors.card,
-                  borderColor: selectedPlan === 'yearly' ? colors.accent : colors.border,
-                },
+                selectedPlan === 'yearly' && styles.planCardSelected,
               ]}
               onPress={() => setSelectedPlan('yearly')}
             >
-              {/* Save Badge - More prominent */}
-              <View style={[styles.saveBadge, { backgroundColor: colors.accent }]}>
-                <Text style={[styles.saveText, { color: colors.primary }]}>SAVE 37%</Text>
+              <View style={styles.bestValueBadge}>
+                <Text style={styles.bestValueText}>🔥 YEARLY — Best value</Text>
               </View>
+              <View style={styles.planPricing}>
+                <Text style={styles.planPrice}>$39.99</Text>
+                <Text style={styles.planPeriod}>/year</Text>
+              </View>
+              <Text style={styles.planSavings}>($3.33/month • Save 33%)</Text>
               
-              <View style={styles.planContent}>
-                <View style={styles.planLeft}>
-                  <View style={styles.planNameRow}>
-                    <Text style={[styles.planName, { color: colors.text }]}>Yearly</Text>
-                    <Text style={[styles.trialBadge, { color: colors.accent }]}>7 days free</Text>
-                  </View>
-                  <View style={styles.priceRow}>
-                    <Text style={[styles.planPrice, { color: colors.text }]}>$4.99</Text>
-                    <Text style={[styles.planPeriod, { color: colors.textMuted }]}>/mo</Text>
-                    <Text style={[styles.originalPrice, { color: colors.textMuted }]}>$7.99/mo</Text>
-                  </View>
-                  <Text style={[styles.planBilled, { color: colors.textSecondary }]}>
-                    $59.99 billed annually after trial
-                  </Text>
-                </View>
-                <View style={[
-                  styles.radioOuter, 
-                  { borderColor: selectedPlan === 'yearly' ? colors.accent : colors.border }
-                ]}>
-                  {selectedPlan === 'yearly' && (
-                    <View style={[styles.radioInner, { backgroundColor: colors.accent }]} />
-                  )}
-                </View>
-              </View>
+              <TouchableOpacity
+                style={styles.trialButton}
+                onPress={handleUpgrade}
+                disabled={isLoading || selectedPlan !== 'yearly'}
+              >
+                {isLoading && selectedPlan === 'yearly' ? (
+                  <ActivityIndicator color={colors.white} />
+                ) : (
+                  <>
+                    <Text style={styles.trialButtonText}>Try 14 Days Free</Text>
+                    <Ionicons name="arrow-forward" size={18} color={colors.white} />
+                  </>
+                )}
+              </TouchableOpacity>
             </TouchableOpacity>
 
             {/* Monthly Plan */}
             <TouchableOpacity
               style={[
                 styles.planCard,
-                {
-                  backgroundColor: selectedPlan === 'monthly' ? colors.accent + '10' : colors.card,
-                  borderColor: selectedPlan === 'monthly' ? colors.accent : colors.border,
-                },
+                selectedPlan === 'monthly' && styles.planCardSelected,
               ]}
               onPress={() => setSelectedPlan('monthly')}
             >
-              <View style={styles.planContent}>
-                <View style={styles.planLeft}>
-                  <Text style={[styles.planName, { color: colors.text }]}>Monthly</Text>
-                  <View style={styles.priceRow}>
-                    <Text style={[styles.planPrice, { color: colors.text }]}>$7.99</Text>
-                    <Text style={[styles.planPeriod, { color: colors.textMuted }]}>/mo</Text>
-                  </View>
-                  <Text style={[styles.planBilled, { color: colors.textSecondary }]}>
-                    Billed monthly, cancel anytime
-                  </Text>
-                </View>
-                <View style={[
-                  styles.radioOuter, 
-                  { borderColor: selectedPlan === 'monthly' ? colors.accent : colors.border }
-                ]}>
-                  {selectedPlan === 'monthly' && (
-                    <View style={[styles.radioInner, { backgroundColor: colors.accent }]} />
-                  )}
-                </View>
+              <View style={styles.monthlyHeader}>
+                <Text style={styles.monthlyLabel}>📱 MONTHLY</Text>
               </View>
+              <View style={styles.planPricing}>
+                <Text style={styles.planPrice}>$4.99</Text>
+                <Text style={styles.planPeriod}>/month</Text>
+              </View>
+              
+              <TouchableOpacity
+                style={[styles.trialButton, selectedPlan !== 'monthly' && styles.trialButtonInactive]}
+                onPress={handleUpgrade}
+                disabled={isLoading || selectedPlan !== 'monthly'}
+              >
+                {isLoading && selectedPlan === 'monthly' ? (
+                  <ActivityIndicator color={colors.white} />
+                ) : (
+                  <>
+                    <Text style={styles.trialButtonText}>Try 14 Days Free</Text>
+                    <Ionicons name="arrow-forward" size={18} color={colors.white} />
+                  </>
+                )}
+              </TouchableOpacity>
             </TouchableOpacity>
           </View>
 
-          {/* CTA Button */}
-          <TouchableOpacity
-            style={[styles.ctaButton, { backgroundColor: colors.accent }]}
-            onPress={handleUpgrade}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color={colors.primary} />
-            ) : (
-              <Text style={[styles.ctaText, { color: colors.primary }]}>
-                {selectedPlan === 'yearly' ? 'Try Free for 7 Days' : 'Start Pro Monthly'}
-              </Text>
-            )}
-          </TouchableOpacity>
-
-          {/* No Payment Due Now - Trust element */}
-          {selectedPlan === 'yearly' && (
-            <View style={styles.noPaymentContainer}>
-              <Ionicons name="shield-checkmark-outline" size={16} color={colors.success} />
-              <Text style={[styles.noPaymentText, { color: colors.textSecondary }]}>
-                No payment due now
-              </Text>
+          {/* Free Forever Option */}
+          <View style={styles.freeForeverSection}>
+            <View style={styles.freeForeverHeader}>
+              <Text style={styles.freeForeverEmoji}>🕊️</Text>
+              <Text style={styles.freeForeverTitle}>FREE FOREVER</Text>
             </View>
-          )}
+            <Text style={styles.freeForeverDesc}>
+              500 saves • 10 collections • Basic search • 3 AI suggestions/month
+            </Text>
+            <TouchableOpacity style={styles.freeButton} onPress={handleContinueFree}>
+              <Text style={styles.freeButtonText}>Continue with Free</Text>
+            </TouchableOpacity>
+          </View>
 
-          {/* Cancel Anytime - Trust element */}
-          <Text style={[styles.cancelText, { color: colors.textMuted }]}>
-            Cancel anytime in settings. No questions asked.
-          </Text>
+          {/* Trust Elements */}
+          <View style={styles.trustSection}>
+            <Text style={styles.trustText}>
+              ✓ No charge for 14 days  ✓ Cancel anytime  ✓ Keep your data
+            </Text>
+          </View>
 
           {/* Footer Links */}
           <View style={styles.footer}>
             <TouchableOpacity onPress={handleRestore}>
-              <Text style={[styles.footerLink, { color: colors.accent }]}>
-                Restore Purchases
-              </Text>
+              <Text style={styles.footerLink}>Restore</Text>
             </TouchableOpacity>
-            <Text style={[styles.footerDot, { color: colors.textMuted }]}>•</Text>
+            <Text style={styles.footerDot}>·</Text>
             <TouchableOpacity>
-              <Text style={[styles.footerLink, { color: colors.textMuted }]}>
-                Terms
-              </Text>
+              <Text style={styles.footerLinkMuted}>Terms</Text>
             </TouchableOpacity>
-            <Text style={[styles.footerDot, { color: colors.textMuted }]}>•</Text>
+            <Text style={styles.footerDot}>·</Text>
             <TouchableOpacity>
-              <Text style={[styles.footerLink, { color: colors.textMuted }]}>
-                Privacy
-              </Text>
+              <Text style={styles.footerLinkMuted}>Privacy</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -309,235 +274,222 @@ export default function UpgradeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.white,
   },
   scrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.xxl,
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 32,
   },
   closeButton: {
-    padding: spacing.sm,
+    padding: 8,
   },
   header: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  proBadge: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: 24,
   },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: typography.body.fontSize,
+    color: colors.gray900,
     textAlign: 'center',
+    marginBottom: 16,
   },
-  // Compact features
-  featuresContainer: {
-    marginBottom: spacing.lg,
-    gap: spacing.md,
+  socialProof: {
+    alignItems: 'center',
+    gap: 8,
   },
-  featureItem: {
+  progressBar: {
+    width: '60%',
+    height: 6,
+    backgroundColor: colors.gray200,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 3,
+  },
+  socialProofText: {
+    fontSize: 14,
+    color: colors.gray500,
+  },
+  socialProofNumber: {
+    fontWeight: '700',
+    color: colors.gray900,
+  },
+  // Features Section
+  featuresSection: {
+    marginBottom: 24,
+    gap: 20,
+  },
+  featureBlock: {
+    gap: 4,
+  },
+  featureHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: 8,
   },
-  featureIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  featureText: {
-    flex: 1,
+  featureEmoji: {
+    fontSize: 20,
   },
   featureTitle: {
-    fontSize: typography.body.fontSize,
+    fontSize: 16,
     fontWeight: '600',
-    marginBottom: 2,
+    color: colors.gray900,
   },
   featureDesc: {
-    fontSize: typography.bodySmall.fontSize,
+    fontSize: 14,
+    color: colors.gray500,
+    paddingLeft: 28,
   },
-  // Trial Timeline
-  timelineContainer: {
-    padding: spacing.lg,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    marginBottom: spacing.lg,
+  featureList: {
+    paddingLeft: 28,
+    gap: 4,
   },
-  timelineTitle: {
-    fontSize: typography.body.fontSize,
-    fontWeight: '600',
-    marginBottom: spacing.md,
-    textAlign: 'center',
-  },
-  timeline: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  timelineStep: {
-    alignItems: 'center',
-    flex: 1,
-    position: 'relative',
-  },
-  timelineIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  timelineDay: {
-    fontSize: typography.bodySmall.fontSize,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  timelineDesc: {
-    fontSize: 11,
-    textAlign: 'center',
-  },
-  timelineConnector: {
-    position: 'absolute',
-    top: 16,
-    left: '60%',
-    right: '-40%',
-    height: 2,
-    zIndex: -1,
+  featureListItem: {
+    fontSize: 14,
+    color: colors.gray500,
+    lineHeight: 20,
   },
   // Plans
   plansContainer: {
-    gap: spacing.md,
-    marginBottom: spacing.lg,
+    gap: 16,
+    marginBottom: 24,
   },
   planCard: {
-    padding: spacing.lg,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 20,
     borderWidth: 2,
-    position: 'relative',
-    overflow: 'hidden',
+    borderColor: colors.gray200,
   },
-  yearlyPlan: {
-    paddingTop: spacing.lg + 4,
+  planCardSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '05',
   },
-  saveBadge: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 4,
-    borderBottomRightRadius: borderRadius.md,
+  bestValueBadge: {
+    marginBottom: 12,
   },
-  saveText: {
-    fontSize: 11,
+  bestValueText: {
+    fontSize: 14,
     fontWeight: '700',
+    color: colors.gray900,
   },
-  planContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  monthlyHeader: {
+    marginBottom: 12,
   },
-  planLeft: {
-    flex: 1,
+  monthlyLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.gray700,
   },
-  planNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  planName: {
-    fontSize: typography.h3.fontSize,
-    fontWeight: '600',
-  },
-  trialBadge: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  priceRow: {
+  planPricing: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 2,
     marginBottom: 4,
   },
   planPrice: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: '700',
+    color: colors.gray900,
   },
   planPeriod: {
-    fontSize: typography.bodySmall.fontSize,
+    fontSize: 16,
+    color: colors.gray500,
+    marginLeft: 4,
   },
-  originalPrice: {
-    fontSize: typography.bodySmall.fontSize,
-    textDecorationLine: 'line-through',
-    marginLeft: spacing.sm,
+  planSavings: {
+    fontSize: 14,
+    color: colors.gray500,
+    marginBottom: 16,
   },
-  planBilled: {
-    fontSize: typography.bodySmall.fontSize,
-  },
-  radioOuter: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  // CTA
-  ctaButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.lg,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.sm,
-  },
-  ctaText: {
-    fontSize: typography.body.fontSize,
-    fontWeight: '700',
-  },
-  // Trust elements
-  noPaymentContainer: {
+  trialButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
+    height: 56,
+    borderRadius: 12,
+    backgroundColor: colors.primary,
+    gap: 8,
   },
-  noPaymentText: {
-    fontSize: typography.body.fontSize,
-    fontWeight: '500',
+  trialButtonInactive: {
+    backgroundColor: colors.gray200,
   },
-  cancelText: {
-    fontSize: typography.bodySmall.fontSize,
+  trialButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.white,
+  },
+  // Free Forever
+  freeForeverSection: {
+    backgroundColor: colors.gray50,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  freeForeverHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  freeForeverEmoji: {
+    fontSize: 20,
+  },
+  freeForeverTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.gray700,
+  },
+  freeForeverDesc: {
+    fontSize: 14,
+    color: colors.gray500,
     textAlign: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: 16,
+  },
+  freeButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 48,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.gray300,
+  },
+  freeButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.gray700,
+  },
+  // Trust Section
+  trustSection: {
+    marginBottom: 24,
+  },
+  trustText: {
+    fontSize: 12,
+    color: colors.gray500,
+    textAlign: 'center',
   },
   // Footer
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: 8,
   },
   footerLink: {
-    fontSize: typography.bodySmall.fontSize,
+    fontSize: 14,
+    color: colors.primary,
+  },
+  footerLinkMuted: {
+    fontSize: 14,
+    color: colors.gray500,
   },
   footerDot: {
-    fontSize: typography.bodySmall.fontSize,
+    fontSize: 14,
+    color: colors.gray500,
   },
 });
