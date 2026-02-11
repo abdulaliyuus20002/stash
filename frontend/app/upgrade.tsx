@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: colors.gray300,
+    borderColor: colors.gray200,
   },
   freeButtonText: {
     fontSize: 14,
