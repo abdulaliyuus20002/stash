@@ -774,9 +774,24 @@ const styles = StyleSheet.create({
   ideaTypeText: { fontSize: 10, fontWeight: '600', textTransform: 'capitalize' },
   ideaDesc: { fontSize: typography.caption.fontSize, lineHeight: 18 },
   // Smart Tags
-  smartTagsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  smartTagsContainer: { gap: spacing.sm },
+  smartTagsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   smartTag: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: borderRadius.full, borderWidth: 1, gap: 4 },
   smartTagText: { fontSize: 12, fontWeight: '500' },
+  approveHint: { fontSize: 12, marginBottom: spacing.xs },
+  approveAllButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: borderRadius.md, gap: spacing.xs, marginTop: spacing.sm },
+  approveAllText: { fontSize: 12, fontWeight: '600' },
+  // Summary Box
+  summaryBox: { padding: spacing.sm, borderRadius: borderRadius.md },
+  summaryPoint: { fontSize: typography.bodySmall.fontSize, lineHeight: 20, marginBottom: 4 },
+  // Collection Suggestion
+  collectionSuggestion: { padding: spacing.md, borderRadius: borderRadius.md, borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  collectionSuggestionContent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
+  collectionSuggestionText: { flex: 1 },
+  collectionSuggestionName: { fontSize: typography.body.fontSize, fontWeight: '600', marginBottom: 2 },
+  collectionSuggestionReason: { fontSize: 12 },
+  addCollectionButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.xs, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm, gap: 4 },
+  addCollectionText: { fontSize: 12, fontWeight: '600' },
   // Action Items
   actionsList: { gap: spacing.sm },
   actionItem: { flexDirection: 'row', alignItems: 'flex-start', padding: spacing.sm, borderRadius: borderRadius.md, gap: spacing.sm },
