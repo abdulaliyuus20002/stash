@@ -77,8 +77,9 @@ class TokenResponse(BaseModel):
 
 # Plan limits
 FREE_PLAN_LIMITS = {
-    "max_collections": 5,
-    "max_items": 50,
+    "max_collections": 10,
+    "max_items": 500,
+    "ai_suggestions_per_month": 3,
     "advanced_search": False,
     "smart_reminders": False,
     "vault_export": False,
@@ -88,14 +89,18 @@ FREE_PLAN_LIMITS = {
 PRO_PLAN_LIMITS = {
     "max_collections": -1,  # Unlimited
     "max_items": -1,  # Unlimited
+    "ai_suggestions_per_month": -1,  # Unlimited
     "advanced_search": True,
     "smart_reminders": True,
     "vault_export": True,
     "ai_features": True,
 }
 
-# Threshold for upgrade nudge
-ITEMS_WARNING_THRESHOLD = 45
+# Threshold for upgrade nudge (at 450 of 500)
+ITEMS_WARNING_THRESHOLD = 450
+
+# Trial duration
+TRIAL_DAYS = 14
 
 def get_user_limits(user: dict) -> dict:
     """Get limits based on user's plan"""
