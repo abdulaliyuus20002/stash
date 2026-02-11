@@ -7,6 +7,7 @@ import {
   RefreshControl, 
   ActivityIndicator,
   TouchableOpacity,
+  Pressable,
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
@@ -66,87 +67,88 @@ export default function CollectionDetailScreen() {
     setRefreshing(false);
   };
 
-  const handleDeleteItem = (item: SavedItem) => {
-    Alert.alert(
-      'Delete Save',
-      `Are you sure you want to delete "${item.title}"? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: async () => {
-            if (!token) return;
-            setDeletingItemId(item.id);
-            try {
-              await deleteItem(token, item.id);
-              // Remove from local state
-              setItems(prev => prev.filter(i => i.id !== item.id));
-            } catch (error) {
-              Alert.alert('Error', 'Failed to delete item. Please try again.');
-            } finally {
-              setDeletingItemId(null);
-            }
-          }
-        }
-      ]
-    );
+  const handleDeleteItem = async (item: SavedItem) => {
+    if (!token) return;
+    setDeletingItemId(item.id);
+    try {
+      await deleteItem(token, item.id);
+      setItems(prev => prev.filter(i => i.id !== item.id));
+    } catch (error) {
+      Alert.alert('Error', 'Failed to delete item. Please try again.');
+    } finally {
+      setDeletingItemId(null);
+    }
   };
 
-  const handleRemoveFromCollection = (item: SavedItem) => {
+  const handleRemoveFromCollection = async (item: SavedItem) => {
+    if (!token || !id) return;
+    setDeletingItemId(item.id);
+    try {
+      const updatedCollections = (item.collections || []).filter(c => c !== id);
+      await axios.put(
+        `${API_URL}/api/items/${item.id}`,
+        { collections: updatedCollections },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setItems(prev => prev.filter(i => i.id !== item.id));
+    } catch (error) {
+      Alert.alert('Error', 'Failed to remove item from collection. Please try again.');
+    } finally {
+      setDeletingItemId(null);
+    }
+  };
+
+  const showItemOptions = (item: SavedItem) => {
     Alert.alert(
-      'Remove from Collection',
-      `Remove "${item.title}" from this collection? The item will still be in your Inbox.`,
+      item.title || 'Item Options',
+      'What would you like to do?',
       [
         { text: 'Cancel', style: 'cancel' },
         { 
-          text: 'Remove', 
-          style: 'destructive',
-          onPress: async () => {
-            if (!token || !id) return;
-            setDeletingItemId(item.id);
-            try {
-              // Update the item to remove this collection
-              const updatedCollections = (item.collections || []).filter(c => c !== id);
-              await axios.put(
-                `${API_URL}/api/items/${item.id}`,
-                { collections: updatedCollections },
-                { headers: { Authorization: `Bearer ${token}` } }
-              );
-              // Remove from local state
-              setItems(prev => prev.filter(i => i.id !== item.id));
-            } catch (error) {
-              Alert.alert('Error', 'Failed to remove item from collection. Please try again.');
-            } finally {
-              setDeletingItemId(null);
-            }
+          text: 'Remove from Collection', 
+          onPress: () => {
+            Alert.alert(
+              'Remove from Collection',
+              `Remove this item from "${collection?.name || 'this collection'}"? It will still be in your Inbox.`,
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Remove', style: 'destructive', onPress: () => handleRemoveFromCollection(item) }
+              ]
+            );
           }
-        }
+        },
+        { 
+          text: 'Delete Permanently', 
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Delete Save',
+              'Are you sure you want to permanently delete this item? This cannot be undone.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: () => handleDeleteItem(item) }
+              ]
+            );
+          }
+        },
       ]
     );
   };
 
   const renderItem = ({ item }: { item: SavedItem }) => (
-    <TouchableOpacity 
-      style={[styles.itemCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-      onPress={() => router.push(`/item/${item.id}`)}
-      activeOpacity={0.7}
-    >
-      <View style={styles.itemContent}>
+    <View style={[styles.itemCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <Pressable 
+        style={styles.itemContent}
+        onPress={() => router.push(`/item/${item.id}`)}
+      >
         {/* Thumbnail */}
-        {item.thumbnail_url ? (
-          <View style={[styles.thumbnail, { backgroundColor: colors.inputBg }]}>
-            <Ionicons name="image-outline" size={24} color={colors.textMuted} />
-          </View>
-        ) : (
-          <View style={[styles.thumbnail, { backgroundColor: colors.inputBg }]}>
-            <Ionicons 
-              name={getPlatformIcon(item.platform)} 
-              size={24} 
-              color={colors.textMuted} 
-            />
-          </View>
-        )}
+        <View style={[styles.thumbnail, { backgroundColor: colors.inputBg }]}>
+          <Ionicons 
+            name={getPlatformIcon(item.platform)} 
+            size={24} 
+            color={colors.textMuted} 
+          />
+        </View>
 
         {/* Info */}
         <View style={styles.itemInfo}>
@@ -172,39 +174,28 @@ export default function CollectionDetailScreen() {
             )}
           </View>
         </View>
+      </Pressable>
 
-        {/* Actions */}
-        <View style={styles.itemActions}>
-          {deletingItemId === item.id ? (
+      {/* Actions - Outside of main pressable */}
+      <View style={styles.itemActions}>
+        {deletingItemId === item.id ? (
+          <View style={[styles.actionButton, { backgroundColor: colors.inputBg }]}>
             <ActivityIndicator size="small" color={colors.accent} />
-          ) : (
-            <TouchableOpacity 
-              style={[styles.actionButton, { backgroundColor: colors.inputBg }]}
-              onPress={() => {
-                Alert.alert(
-                  'Item Options',
-                  'What would you like to do?',
-                  [
-                    { text: 'Cancel', style: 'cancel' },
-                    { 
-                      text: 'Remove from Collection', 
-                      onPress: () => handleRemoveFromCollection(item)
-                    },
-                    { 
-                      text: 'Delete Permanently', 
-                      style: 'destructive',
-                      onPress: () => handleDeleteItem(item)
-                    },
-                  ]
-                );
-              }}
-            >
-              <Ionicons name="ellipsis-horizontal" size={18} color={colors.textSecondary} />
-            </TouchableOpacity>
-          )}
-        </View>
+          </View>
+        ) : (
+          <Pressable 
+            style={({ pressed }) => [
+              styles.actionButton, 
+              { backgroundColor: pressed ? colors.border : colors.inputBg }
+            ]}
+            onPress={() => showItemOptions(item)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="ellipsis-horizontal" size={18} color={colors.textSecondary} />
+          </Pressable>
+        )}
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
   const renderEmpty = () => (
@@ -304,11 +295,14 @@ const styles = StyleSheet.create({
   },
   // Item Card Styles
   itemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     overflow: 'hidden',
   },
   itemContent: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
@@ -346,12 +340,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemActions: {
-    paddingLeft: spacing.sm,
+    paddingRight: spacing.md,
   },
   actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
