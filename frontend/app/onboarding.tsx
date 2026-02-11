@@ -31,22 +31,22 @@ const colors = {
   white: '#FFFFFF',
 };
 
-// Personalization options (5 max)
+// Personalization options with icons
 const PERSONALIZATION_OPTIONS = [
-  { id: 'videos', emoji: '🎬', label: 'Videos & Podcasts' },
-  { id: 'articles', emoji: '📰', label: 'Articles & News' },
-  { id: 'business', emoji: '💡', label: 'Business & Ideas' },
-  { id: 'design', emoji: '🎨', label: 'Design & Inspiration' },
-  { id: 'other', emoji: '📚', label: 'Everything Else' },
+  { id: 'videos', icon: 'videocam', label: 'Videos & Podcasts' },
+  { id: 'articles', icon: 'newspaper', label: 'Articles & News' },
+  { id: 'business', icon: 'bulb', label: 'Business & Ideas' },
+  { id: 'design', icon: 'color-palette', label: 'Design & Inspiration' },
+  { id: 'other', icon: 'library', label: 'Everything Else' },
 ];
 
 // Platform icons for Screen 2
 const PLATFORMS = [
-  { name: 'YouTube', icon: 'logo-youtube' },
-  { name: 'Instagram', icon: 'logo-instagram' },
-  { name: 'Twitter', icon: 'logo-twitter' },
-  { name: 'LinkedIn', icon: 'logo-linkedin' },
-  { name: 'Web', icon: 'globe-outline' },
+  { name: 'YouTube', icon: 'logo-youtube', color: '#FF0000' },
+  { name: 'Instagram', icon: 'logo-instagram', color: '#E4405F' },
+  { name: 'Twitter', icon: 'logo-twitter', color: '#1DA1F2' },
+  { name: 'LinkedIn', icon: 'logo-linkedin', color: '#0077B5' },
+  { name: 'Web', icon: 'globe-outline', color: colors.gray700 },
 ];
 
 export default function OnboardingScreen() {
@@ -128,6 +128,22 @@ export default function OnboardingScreen() {
   const renderScreen1 = () => (
     <View style={styles.screenContent}>
       <View style={styles.contentCenter}>
+        {/* Icon illustration */}
+        <View style={styles.illustrationContainer}>
+          <View style={[styles.illustrationCircle, { backgroundColor: colors.primary + '15' }]}>
+            <Ionicons name="cloud-outline" size={48} color={colors.primary} />
+          </View>
+          <View style={[styles.floatingIcon, styles.floatingIcon1]}>
+            <Ionicons name="bookmark" size={16} color={colors.gray500} />
+          </View>
+          <View style={[styles.floatingIcon, styles.floatingIcon2]}>
+            <Ionicons name="link" size={14} color={colors.gray500} />
+          </View>
+          <View style={[styles.floatingIcon, styles.floatingIcon3]}>
+            <Ionicons name="play" size={14} color={colors.gray500} />
+          </View>
+        </View>
+
         <Text style={styles.headline}>
           That "I'll save this for later" video?
         </Text>
@@ -156,7 +172,9 @@ export default function OnboardingScreen() {
         <View style={styles.platformRow}>
           {PLATFORMS.map((platform, index) => (
             <View key={index} style={styles.platformItem}>
-              <Ionicons name={platform.icon as any} size={28} color={colors.gray700} />
+              <View style={[styles.platformIconContainer, { backgroundColor: platform.color + '15' }]}>
+                <Ionicons name={platform.icon as any} size={24} color={platform.color} />
+              </View>
               <Text style={styles.platformLabel}>{platform.name}</Text>
             </View>
           ))}
@@ -165,18 +183,22 @@ export default function OnboardingScreen() {
         {/* Steps */}
         <View style={styles.stepsContainer}>
           <View style={styles.stepItem}>
-            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>1</Text></View>
+            <View style={[styles.stepNumber, { backgroundColor: colors.gray100 }]}>
+              <Text style={styles.stepNumberText}>1</Text>
+            </View>
             <Text style={styles.stepText}>Tap share → Choose Stash</Text>
           </View>
           <View style={styles.stepItem}>
-            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>2</Text></View>
+            <View style={[styles.stepNumber, { backgroundColor: colors.gray100 }]}>
+              <Text style={styles.stepNumberText}>2</Text>
+            </View>
             <Text style={styles.stepText}>AI suggests tags & collections</Text>
           </View>
           <View style={styles.stepItem}>
             <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}>
               <Ionicons name="checkmark" size={14} color={colors.white} />
             </View>
-            <Text style={styles.stepText}>You approve. Done.</Text>
+            <Text style={[styles.stepText, { fontWeight: '600' }]}>You approve. Done.</Text>
           </View>
         </View>
       </View>
@@ -191,8 +213,15 @@ export default function OnboardingScreen() {
   const renderScreen3 = () => (
     <View style={styles.screenContent}>
       <View style={styles.contentCenter}>
+        {/* Brain icon */}
+        <View style={[styles.illustrationCircle, { backgroundColor: colors.primary + '15', marginBottom: 24 }]}>
+          <Ionicons name="flash" size={40} color={colors.primary} />
+        </View>
+
         <Text style={styles.headline}>
-          Your brain has <Text style={styles.highlight}>50,000 thoughts</Text> a day.
+          Your brain has{' '}
+          <Text style={styles.highlight}>50,000 thoughts</Text>
+          {' '}a day.
         </Text>
         <Text style={styles.subtext}>
           Stop using them to remember URLs.
@@ -200,17 +229,19 @@ export default function OnboardingScreen() {
         
         <View style={styles.philosophyBox}>
           <Text style={styles.philosophyText}>
-            Stash remembers the content.{'\n'}
-            <Text style={styles.philosophyBold}>You stay in control.</Text>
+            Stash remembers the content.
           </Text>
+          <Text style={styles.philosophyBold}>You stay in control.</Text>
         </View>
 
         <View style={styles.promiseBox}>
-          <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
-          <Text style={styles.promiseText}>
-            AI suggests. You decide.{'\n'}
+          <View style={[styles.promiseIcon, { backgroundColor: colors.primary }]}>
+            <Ionicons name="shield-checkmark" size={20} color={colors.white} />
+          </View>
+          <View style={styles.promiseTextContainer}>
+            <Text style={styles.promiseTitle}>AI suggests. You decide.</Text>
             <Text style={styles.promiseSubtext}>Collections, tags, summaries — you approve everything.</Text>
-          </Text>
+          </View>
         </View>
       </View>
       <TouchableOpacity style={styles.ctaButton} onPress={handleNext}>
@@ -239,7 +270,16 @@ export default function OnboardingScreen() {
               ]}
               onPress={() => setSelectedCategory(option.id)}
             >
-              <Text style={styles.optionEmoji}>{option.emoji}</Text>
+              <View style={[
+                styles.optionIconContainer,
+                { backgroundColor: selectedCategory === option.id ? colors.primary + '20' : colors.gray100 }
+              ]}>
+                <Ionicons
+                  name={option.icon as any}
+                  size={22}
+                  color={selectedCategory === option.id ? colors.primary : colors.gray500}
+                />
+              </View>
               <Text style={[
                 styles.optionLabel,
                 selectedCategory === option.id && styles.optionLabelSelected,
@@ -247,7 +287,7 @@ export default function OnboardingScreen() {
                 {option.label}
               </Text>
               {selectedCategory === option.id && (
-                <View style={styles.optionCheck}>
+                <View style={[styles.optionCheck, { backgroundColor: colors.primary }]}>
                   <Ionicons name="checkmark" size={14} color={colors.white} />
                 </View>
               )}
@@ -269,37 +309,28 @@ export default function OnboardingScreen() {
   // SCREEN 5: The Big Choice
   const renderScreen5 = () => (
     <ScrollView style={styles.scrollView} contentContainerStyle={styles.screen5Content}>
-      <Text style={styles.socialProof}>
-        Join <Text style={styles.socialProofNumber}>4,237</Text> people organizing their digital life.
-      </Text>
+      {/* Social proof */}
+      <View style={styles.socialProofContainer}>
+        <Ionicons name="people" size={18} color={colors.gray500} />
+        <Text style={styles.socialProof}>
+          Join <Text style={styles.socialProofNumber}>4,237</Text> people organizing their digital life.
+        </Text>
+      </View>
 
       {/* FREE FOREVER Card */}
       <View style={styles.planCard}>
         <View style={styles.planHeader}>
-          <Text style={styles.planEmoji}>✨</Text>
+          <View style={[styles.planIcon, { backgroundColor: colors.gray100 }]}>
+            <Ionicons name="sparkles-outline" size={20} color={colors.gray700} />
+          </View>
           <Text style={styles.planTitle}>FREE FOREVER</Text>
         </View>
         <View style={styles.planFeatures}>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.success} />
-            <Text style={styles.planFeatureText}>500 saves – 3 months of collecting</Text>
-          </View>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.success} />
-            <Text style={styles.planFeatureText}>10 collections – You organize manually</Text>
-          </View>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.success} />
-            <Text style={styles.planFeatureText}>Basic search – Find by title</Text>
-          </View>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.success} />
-            <Text style={styles.planFeatureText}>3 AI suggestions/month – Try the magic</Text>
-          </View>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.success} />
-            <Text style={styles.planFeatureText}>Every device – Syncs everywhere</Text>
-          </View>
+          <FeatureItem icon="save-outline" text="500 saves – 3 months of collecting" color={colors.success} />
+          <FeatureItem icon="folder-outline" text="10 collections – You organize manually" color={colors.success} />
+          <FeatureItem icon="search-outline" text="Basic search – Find by title" color={colors.success} />
+          <FeatureItem icon="sparkles-outline" text="3 AI suggestions/month – Try the magic" color={colors.success} />
+          <FeatureItem icon="sync-outline" text="Every device – Syncs everywhere" color={colors.success} />
         </View>
         <TouchableOpacity 
           style={styles.freeButton} 
@@ -313,34 +344,18 @@ export default function OnboardingScreen() {
       {/* PRO TRIAL Card */}
       <View style={[styles.planCard, styles.proCard]}>
         <View style={styles.planHeader}>
-          <Text style={styles.planEmoji}>🚀</Text>
+          <View style={[styles.planIcon, { backgroundColor: colors.primary }]}>
+            <Ionicons name="rocket" size={20} color={colors.white} />
+          </View>
           <Text style={styles.planTitle}>TRY PRO FREE – 14 Days</Text>
         </View>
         <View style={styles.planFeatures}>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.primary} />
-            <Text style={styles.planFeatureText}>Unlimited saves & collections</Text>
-          </View>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.primary} />
-            <Text style={styles.planFeatureText}>AI suggests smart tags – You approve in 1 tap</Text>
-          </View>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.primary} />
-            <Text style={styles.planFeatureText}>AI generates summaries – Key ideas instantly</Text>
-          </View>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.primary} />
-            <Text style={styles.planFeatureText}>AI recommends collections – Based on your content</Text>
-          </View>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.primary} />
-            <Text style={styles.planFeatureText}>Advanced search – Find anything</Text>
-          </View>
-          <View style={styles.planFeature}>
-            <Ionicons name="checkmark" size={16} color={colors.primary} />
-            <Text style={styles.planFeatureText}>Cancel anytime, keep your data</Text>
-          </View>
+          <FeatureItem icon="infinite-outline" text="Unlimited saves & collections" color={colors.primary} />
+          <FeatureItem icon="pricetags-outline" text="AI suggests smart tags – You approve in 1 tap" color={colors.primary} />
+          <FeatureItem icon="document-text-outline" text="AI generates summaries – Key ideas instantly" color={colors.primary} />
+          <FeatureItem icon="folder-open-outline" text="AI recommends collections – Based on your content" color={colors.primary} />
+          <FeatureItem icon="search" text="Advanced search – Find anything" color={colors.primary} />
+          <FeatureItem icon="shield-checkmark-outline" text="Cancel anytime, keep your data" color={colors.primary} />
         </View>
         <TouchableOpacity 
           style={styles.proButton} 
@@ -354,9 +369,14 @@ export default function OnboardingScreen() {
 
       {/* Fine print */}
       <View style={styles.finePrint}>
-        <Text style={styles.finePrintText}>
-          ✓ Card required for trial  ✓ No charge for 14 days
-        </Text>
+        <View style={styles.finePrintItem}>
+          <Ionicons name="card-outline" size={14} color={colors.gray500} />
+          <Text style={styles.finePrintText}>Card required for trial</Text>
+        </View>
+        <View style={styles.finePrintItem}>
+          <Ionicons name="checkmark-circle-outline" size={14} color={colors.gray500} />
+          <Text style={styles.finePrintText}>No charge for 14 days</Text>
+        </View>
       </View>
     </ScrollView>
   );
@@ -389,6 +409,14 @@ export default function OnboardingScreen() {
   );
 }
 
+// Feature Item Component
+const FeatureItem = ({ icon, text, color }: { icon: string; text: string; color: string }) => (
+  <View style={styles.featureItem}>
+    <Ionicons name={icon as any} size={18} color={color} />
+    <Text style={styles.featureText}>{text}</Text>
+  </View>
+);
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -405,41 +433,77 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    paddingVertical: 8,
   },
   skipText: {
-    fontSize: 14,
+    fontSize: 15,
     color: colors.gray500,
+    fontWeight: '500',
   },
   progressText: {
-    fontSize: 14,
+    fontSize: 15,
     color: colors.gray500,
+    fontWeight: '600',
   },
   screenContent: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingBottom: 32,
     justifyContent: 'space-between',
   },
   contentCenter: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   contentTop: {
     flex: 1,
     paddingTop: 32,
   },
+  // Illustration styles
+  illustrationContainer: {
+    position: 'relative',
+    marginBottom: 32,
+  },
+  illustrationCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  floatingIcon: {
+    position: 'absolute',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  floatingIcon1: { top: -5, right: -10 },
+  floatingIcon2: { bottom: 10, left: -15 },
+  floatingIcon3: { top: 20, left: -10 },
+  // Typography
   headline: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: colors.gray900,
-    lineHeight: 40,
+    lineHeight: 36,
+    textAlign: 'center',
     marginBottom: 8,
   },
   headlineAccent: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: colors.primary,
-    lineHeight: 40,
+    lineHeight: 36,
+    textAlign: 'center',
     marginBottom: 16,
   },
   highlight: {
@@ -449,53 +513,65 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.gray500,
     lineHeight: 24,
+    textAlign: 'center',
     marginBottom: 32,
   },
+  // CTA Button
   ctaButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primary,
     height: 56,
-    borderRadius: 12,
+    borderRadius: 16,
     gap: 8,
   },
   ctaButtonDisabled: {
     backgroundColor: colors.gray200,
   },
   ctaText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '600',
     color: colors.white,
   },
-  // Screen 2 styles
+  // Screen 2 - Platforms
   platformRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 32,
+    width: '100%',
+    marginBottom: 40,
     paddingHorizontal: 8,
   },
   platformItem: {
     alignItems: 'center',
-    gap: 4,
+    gap: 8,
+  },
+  platformIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   platformLabel: {
-    fontSize: 10,
+    fontSize: 11,
     color: colors.gray500,
+    fontWeight: '500',
   },
+  // Steps
   stepsContainer: {
+    width: '100%',
     gap: 16,
   },
   stepItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
   },
   stepNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.gray200,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -508,45 +584,61 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.gray700,
   },
-  // Screen 3 styles
+  // Screen 3 - Philosophy
   philosophyBox: {
     backgroundColor: colors.gray50,
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 24,
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 20,
+    alignItems: 'center',
+    width: '100%',
   },
   philosophyText: {
-    fontSize: 16,
-    color: colors.gray700,
-    lineHeight: 24,
+    fontSize: 17,
+    color: colors.gray600,
+    lineHeight: 26,
     textAlign: 'center',
+    marginBottom: 4,
   },
   philosophyBold: {
+    fontSize: 17,
     fontWeight: '700',
     color: colors.gray900,
+    textAlign: 'center',
   },
   promiseBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
-    backgroundColor: colors.primary + '10',
-    padding: 16,
-    borderRadius: 12,
+    gap: 16,
+    backgroundColor: colors.primary + '08',
+    padding: 20,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: colors.primary + '30',
+    borderColor: colors.primary + '20',
+    width: '100%',
   },
-  promiseText: {
+  promiseIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  promiseTextContainer: {
     flex: 1,
+  },
+  promiseTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.gray900,
-    lineHeight: 24,
+    marginBottom: 4,
   },
   promiseSubtext: {
-    fontWeight: '400',
+    fontSize: 14,
     color: colors.gray500,
+    lineHeight: 20,
   },
-  // Screen 4 styles
+  // Screen 4 - Options
   optionsContainer: {
     gap: 12,
     marginTop: 24,
@@ -556,18 +648,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.gray50,
     paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
     borderWidth: 2,
     borderColor: 'transparent',
-    gap: 12,
+    gap: 16,
   },
   optionPillSelected: {
     borderColor: colors.primary,
-    backgroundColor: colors.primary + '10',
+    backgroundColor: colors.primary + '08',
   },
-  optionEmoji: {
-    fontSize: 24,
+  optionIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   optionLabel: {
     flex: 1,
@@ -583,23 +679,27 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  // Screen 5 styles
+  // Screen 5 - Plans
   scrollView: {
     flex: 1,
   },
   screen5Content: {
     paddingHorizontal: 24,
-    paddingBottom: 32,
+    paddingBottom: 40,
+  },
+  socialProofContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginVertical: 24,
   },
   socialProof: {
-    fontSize: 16,
+    fontSize: 15,
     color: colors.gray500,
-    textAlign: 'center',
-    marginVertical: 24,
   },
   socialProofNumber: {
     fontWeight: '700',
@@ -607,7 +707,7 @@ const styles = StyleSheet.create({
   },
   planCard: {
     backgroundColor: colors.white,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 24,
     marginBottom: 16,
     borderWidth: 1,
@@ -616,71 +716,83 @@ const styles = StyleSheet.create({
   proCard: {
     borderColor: colors.primary,
     borderWidth: 2,
-    backgroundColor: colors.primary + '05',
+    backgroundColor: colors.primary + '03',
   },
   planHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
+    gap: 12,
+    marginBottom: 20,
   },
-  planEmoji: {
-    fontSize: 20,
+  planIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   planTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: colors.gray900,
+    letterSpacing: 0.3,
   },
   planFeatures: {
-    gap: 12,
-    marginBottom: 20,
+    gap: 14,
+    marginBottom: 24,
   },
-  planFeature: {
+  featureItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8,
+    gap: 12,
   },
-  planFeatureText: {
+  featureText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     color: colors.gray700,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   freeButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 56,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray300,
+    backgroundColor: colors.white,
   },
   freeButtonText: {
     fontSize: 16,
-    fontWeight: '700',
-    color: colors.gray900,
+    fontWeight: '600',
+    color: colors.gray700,
   },
   proButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 56,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     backgroundColor: colors.primary,
     gap: 8,
   },
   proButtonText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.white,
   },
   finePrint: {
-    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 24,
     paddingVertical: 16,
   },
+  finePrintItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   finePrintText: {
-    fontSize: 12,
+    fontSize: 13,
     color: colors.gray500,
-    textAlign: 'center',
   },
 });
