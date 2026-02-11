@@ -408,7 +408,7 @@ export default function ItemDetailScreen() {
                     {aiSummary.length === 0 && (
                       <TouchableOpacity
                         style={[styles.aiFeatureButton, { backgroundColor: colors.accent }]}
-                        onPress={generateSummary}
+                        onPress={generateAISummary}
                         disabled={isGeneratingSummary}
                       >
                         {isGeneratingSummary ? (
