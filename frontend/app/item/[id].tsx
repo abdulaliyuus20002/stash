@@ -377,7 +377,7 @@ export default function ItemDetailScreen() {
             ) : null}
           </View>
 
-          {/* Premium AI Features Panel */}
+          {/* AI Suggestions Panel */}
           <View style={[styles.premiumPanel, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <TouchableOpacity 
               style={styles.premiumHeader}
@@ -385,9 +385,9 @@ export default function ItemDetailScreen() {
             >
               <View style={styles.premiumTitleRow}>
                 <View style={[styles.premiumBadge, { backgroundColor: colors.accent }]}>
-                  <Ionicons name="diamond" size={14} color={colors.primary} />
+                  <Ionicons name="sparkles" size={14} color={colors.primary} />
                 </View>
-                <Text style={[styles.premiumTitle, { color: colors.text }]}>AI Power Tools</Text>
+                <Text style={[styles.premiumTitle, { color: colors.text }]}>AI Suggestions</Text>
               </View>
               <Ionicons 
                 name={showAIPanel ? "chevron-up" : "chevron-down"} 
@@ -398,7 +398,148 @@ export default function ItemDetailScreen() {
 
             {showAIPanel && (
               <View style={styles.premiumContent}>
-                {/* Idea Extraction */}
+                {/* Generate Summary */}
+                <View style={styles.aiFeatureCard}>
+                  <View style={styles.aiFeatureHeader}>
+                    <View style={styles.aiFeatureTitleRow}>
+                      <Ionicons name="document-text-outline" size={18} color={colors.accent} />
+                      <Text style={[styles.aiFeatureTitle, { color: colors.text }]}>AI Summary</Text>
+                    </View>
+                    {aiSummary.length === 0 && (
+                      <TouchableOpacity
+                        style={[styles.aiFeatureButton, { backgroundColor: colors.accent }]}
+                        onPress={generateSummary}
+                        disabled={isGeneratingSummary}
+                      >
+                        {isGeneratingSummary ? (
+                          <ActivityIndicator size="small" color={colors.white} />
+                        ) : (
+                          <Text style={[styles.aiFeatureButtonText, { color: colors.white }]}>Generate Summary</Text>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  {aiSummary.length > 0 && (
+                    <View style={[styles.summaryBox, { backgroundColor: colors.inputBg }]}>
+                      {aiSummary.map((point, idx) => (
+                        <Text key={idx} style={[styles.summaryPoint, { color: colors.text }]}>• {point}</Text>
+                      ))}
+                    </View>
+                  )}
+                </View>
+
+                {/* Suggested Tags - Approve or Edit */}
+                <View style={styles.aiFeatureCard}>
+                  <View style={styles.aiFeatureHeader}>
+                    <View style={styles.aiFeatureTitleRow}>
+                      <Ionicons name="pricetags-outline" size={18} color={colors.accent} />
+                      <Text style={[styles.aiFeatureTitle, { color: colors.text }]}>Suggested Tags</Text>
+                    </View>
+                    {smartTags.length === 0 && (
+                      <TouchableOpacity
+                        style={[styles.aiFeatureButton, { backgroundColor: colors.inputBg }]}
+                        onPress={generateSmartTags}
+                        disabled={isGeneratingTags}
+                      >
+                        {isGeneratingTags ? (
+                          <ActivityIndicator size="small" color={colors.accent} />
+                        ) : (
+                          <Text style={[styles.aiFeatureButtonText, { color: colors.accent }]}>Get Suggestions</Text>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  {smartTags.length > 0 && (
+                    <View style={styles.smartTagsContainer}>
+                      <Text style={[styles.approveHint, { color: colors.textMuted }]}>Tap to approve:</Text>
+                      <View style={styles.smartTagsWrap}>
+                        {smartTags.map((tag, index) => (
+                          <TouchableOpacity 
+                            key={index} 
+                            style={[
+                              styles.smartTag, 
+                              { 
+                                backgroundColor: editedTags.includes(tag.name) ? colors.accent + '20' : colors.inputBg,
+                                borderColor: editedTags.includes(tag.name) ? colors.accent : colors.border
+                              }
+                            ]}
+                            onPress={() => applySmartTag(tag.name)}
+                          >
+                            <Text style={[styles.smartTagText, { color: editedTags.includes(tag.name) ? colors.accent : colors.textSecondary }]}>
+                              #{tag.name}
+                            </Text>
+                            <Ionicons 
+                              name={editedTags.includes(tag.name) ? "checkmark-circle" : "add-circle-outline"} 
+                              size={16} 
+                              color={editedTags.includes(tag.name) ? colors.accent : colors.textMuted} 
+                            />
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                      {smartTags.length > 0 && !smartTags.every(t => editedTags.includes(t.name)) && (
+                        <TouchableOpacity 
+                          style={[styles.approveAllButton, { backgroundColor: colors.accent }]}
+                          onPress={() => {
+                            const newTags = [...editedTags];
+                            smartTags.forEach(t => {
+                              if (!newTags.includes(t.name)) newTags.push(t.name);
+                            });
+                            setEditedTags(newTags);
+                          }}
+                        >
+                          <Ionicons name="checkmark-done" size={16} color={colors.white} />
+                          <Text style={[styles.approveAllText, { color: colors.white }]}>Approve All</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  )}
+                </View>
+
+                {/* Recommended Collection */}
+                <View style={styles.aiFeatureCard}>
+                  <View style={styles.aiFeatureHeader}>
+                    <View style={styles.aiFeatureTitleRow}>
+                      <Ionicons name="folder-outline" size={18} color={colors.accent} />
+                      <Text style={[styles.aiFeatureTitle, { color: colors.text }]}>Recommended Collection</Text>
+                    </View>
+                    {!collectionSuggestion && (
+                      <TouchableOpacity
+                        style={[styles.aiFeatureButton, { backgroundColor: colors.inputBg }]}
+                        onPress={getCollectionSuggestion}
+                        disabled={isGeneratingSummary}
+                      >
+                        <Text style={[styles.aiFeatureButtonText, { color: colors.accent }]}>Get Suggestion</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  {collectionSuggestion && (
+                    <View style={[styles.collectionSuggestion, { backgroundColor: colors.inputBg, borderColor: colors.accent }]}>
+                      <View style={styles.collectionSuggestionContent}>
+                        <Ionicons name="folder" size={20} color={colors.accent} />
+                        <View style={styles.collectionSuggestionText}>
+                          <Text style={[styles.collectionSuggestionName, { color: colors.text }]}>{collectionSuggestion.collection_name}</Text>
+                          <Text style={[styles.collectionSuggestionReason, { color: colors.textMuted }]}>{collectionSuggestion.reason}</Text>
+                        </View>
+                      </View>
+                      <TouchableOpacity 
+                        style={[styles.addCollectionButton, { backgroundColor: colors.accent }]}
+                        onPress={() => {
+                          // Find or create collection
+                          const existing = collections.find(c => c.name.toLowerCase() === collectionSuggestion.collection_name.toLowerCase());
+                          if (existing && !selectedCollections.includes(existing.id)) {
+                            setSelectedCollections([...selectedCollections, existing.id]);
+                          }
+                          Alert.alert('Added!', `Added to ${collectionSuggestion.collection_name}`);
+                        }}
+                      >
+                        <Ionicons name="add" size={16} color={colors.white} />
+                        <Text style={[styles.addCollectionText, { color: colors.white }]}>Add</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+
+                {/* Extract Key Ideas */}
                 <View style={styles.aiFeatureCard}>
                   <View style={styles.aiFeatureHeader}>
                     <View style={styles.aiFeatureTitleRow}>
@@ -414,7 +555,7 @@ export default function ItemDetailScreen() {
                         {isExtractingIdeas ? (
                           <ActivityIndicator size="small" color={colors.accent} />
                         ) : (
-                          <Text style={[styles.aiFeatureButtonText, { color: colors.accent }]}>Extract</Text>
+                          <Text style={[styles.aiFeatureButtonText, { color: colors.accent }]}>Extract Ideas</Text>
                         )}
                       </TouchableOpacity>
                     )}
@@ -440,52 +581,7 @@ export default function ItemDetailScreen() {
                   )}
                 </View>
 
-                {/* Smart Tags */}
-                <View style={styles.aiFeatureCard}>
-                  <View style={styles.aiFeatureHeader}>
-                    <View style={styles.aiFeatureTitleRow}>
-                      <Ionicons name="pricetags-outline" size={18} color={colors.accent} />
-                      <Text style={[styles.aiFeatureTitle, { color: colors.text }]}>Smart Tags</Text>
-                    </View>
-                    {smartTags.length === 0 && (
-                      <TouchableOpacity
-                        style={[styles.aiFeatureButton, { backgroundColor: colors.inputBg }]}
-                        onPress={generateSmartTags}
-                        disabled={isGeneratingTags}
-                      >
-                        {isGeneratingTags ? (
-                          <ActivityIndicator size="small" color={colors.accent} />
-                        ) : (
-                          <Text style={[styles.aiFeatureButtonText, { color: colors.accent }]}>Suggest</Text>
-                        )}
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                  {smartTags.length > 0 && (
-                    <View style={styles.smartTagsContainer}>
-                      {smartTags.map((tag, index) => (
-                        <TouchableOpacity 
-                          key={index} 
-                          style={[
-                            styles.smartTag, 
-                            { 
-                              backgroundColor: tag.confidence === 'high' ? colors.accent + '20' : colors.inputBg,
-                              borderColor: tag.confidence === 'high' ? colors.accent : colors.border
-                            }
-                          ]}
-                          onPress={() => applySmartTag(tag.name)}
-                        >
-                          <Text style={[styles.smartTagText, { color: tag.confidence === 'high' ? colors.accent : colors.textSecondary }]}>
-                            #{tag.name}
-                          </Text>
-                          <Ionicons name="add-circle" size={16} color={tag.confidence === 'high' ? colors.accent : colors.textMuted} />
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  )}
-                </View>
-
-                {/* Action Items */}
+                {/* Extract Action Items */}
                 <View style={styles.aiFeatureCard}>
                   <View style={styles.aiFeatureHeader}>
                     <View style={styles.aiFeatureTitleRow}>
