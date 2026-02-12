@@ -10,7 +10,13 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.stashpro.app"
+      "bundleIdentifier": "com.stashpro.app",
+      "appGroupIdentifier": "group.com.stashpro.shared",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +24,25 @@
         "backgroundColor": "#000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.stashpro.app"
+      "package": "com.stashpro.app",
+      "intentFilters": [
+        {
+          "action": "android.intent.action.SEND",
+          "category": ["android.intent.category.DEFAULT"],
+          "data": [
+            { "mimeType": "text/plain" },
+            { "mimeType": "text/*" }
+          ]
+        },
+        {
+          "action": "android.intent.action.SEND_MULTIPLE",
+          "category": ["android.intent.category.DEFAULT"],
+          "data": [
+            { "mimeType": "text/plain" },
+            { "mimeType": "text/*" }
+          ]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -34,6 +58,17 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#000"
+        }
+      ],
+      [
+        "expo-share-intent",
+        {
+          "iosActivationRules": {
+            "NSExtensionActivationSupportsWebURLWithMaxCount": 1,
+            "NSExtensionActivationSupportsText": true
+          },
+          "androidIntentFilters": ["text/*"],
+          "androidMultiIntentFilters": ["text/*"]
         }
       ]
     ],
