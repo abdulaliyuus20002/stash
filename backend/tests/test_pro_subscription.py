@@ -18,7 +18,7 @@ import uuid
 from datetime import datetime
 
 # Base URL from environment
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://pro-features-preview.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://stash-mobile-app.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 FREE_USER_EMAIL = f"test_free_{uuid.uuid4().hex[:8]}@test.com"
