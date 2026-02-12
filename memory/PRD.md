@@ -1,246 +1,136 @@
-# Stash - Content Saving & Organizing App
+# Stash Pro - Product Requirements Document
 
 ## Original Problem Statement
-Build a cross-platform mobile app (iOS + Android) called "Stash" for saving and organizing content. The app should allow users to save URLs, organize them in collections, add notes/tags, and leverage AI features for smarter content management.
+Build a cross-platform mobile app (iOS + Android) called "Stash Pro" for saving and organizing content with AI-powered suggestions.
 
-## Target Users
-- Content collectors who save articles, videos, and social media posts
-- Professionals who need to organize research and references
-- Creators who gather inspiration from various platforms
-- Anyone who wants a "second brain" for their saved content
+## Core Product Vision
+A private content vault where users save content from anywhere, organize with collections, and get AI-powered suggestions (that users approve, not auto-apply).
 
-## Tech Stack
-- **Frontend**: React Native + Expo (TypeScript)
-- **Backend**: FastAPI (Python)
-- **Database**: MongoDB
-- **AI**: OpenAI GPT-4 via emergentintegrations library
-- **Auth**: JWT-based authentication
+**Key Principle**: "AI suggests, User approves" - All AI features require explicit user action.
 
-## Core Requirements
+---
 
-### Authentication (Completed)
-- [x] User registration with email/password
-- [x] User login
-- [x] JWT token-based auth
-- [x] Protected routes
+## What's Been Implemented
 
-### Content Management (Completed)
-- [x] Save items via URL
-- [x] Auto-extract metadata (title, thumbnail, platform)
-- [x] Add notes to saved items
-- [x] Tag system
-- [x] Edit/delete items
+### Completed Features (as of Feb 2025)
 
-### Collections (Completed)
-- [x] Create collections
-- [x] Edit/delete collections
-- [x] Add items to collections
-- [x] Collection limit enforcement (5 for free, unlimited for Pro)
+#### Onboarding & Authentication
+- [x] New 5-screen onboarding flow with personalization
+- [x] JWT-based authentication (login/register)
+- [x] "Free Forever" vs "Pro Trial" choice at end of onboarding
 
-### Search (Completed)
-- [x] Basic search (titles, tags, notes, platform)
-- [x] Advanced search (Pro feature) - search within notes & tags
+#### Paywall & Pricing
+- [x] Redesigned paywall with 14-day free trial
+- [x] New pricing: $39.99/year or $4.99/month
+- [x] Social proof elements (user count, progress bar)
+- [x] Trust elements (no charge for 14 days, cancel anytime)
 
-### AI Features (Completed)
-- [x] AI-powered summaries
-- [x] Key idea extraction
-- [x] Smart tag suggestions with clustering
-- [x] Action item generation
-- [x] Auto-collection suggestions
+#### Core Functionality
+- [x] Save items (URLs with metadata)
+- [x] Create and manage collections
+- [x] Delete items from collections
+- [x] Search functionality
+- [x] Item detail view with AI Suggestions panel
 
-### Stash Pro - Subscription Tier (Completed - Feb 8, 2025)
-- [x] Unlimited collections (free users limited to 5)
-- [x] Advanced search (search within notes & tags)
-- [x] Smart resurfacing reminders
-- [x] Vault export (backup all data)
-- [x] Priority performance & AI features access
-- [x] Upgrade flow with plan selection (monthly/yearly)
-- [x] Cancel subscription functionality
-- [x] Pro status display in profile
+#### AI Features (via Emergent LLM Key + GPT-4)
+- [x] Smart tag suggestions (user must approve)
+- [x] AI summaries (generate on-demand)
+- [x] Key Ideas extraction
+- [x] Collection recommendations
 
-### User Experience (Completed)
-- [x] Multi-step onboarding flow for new users
-- [x] Home dashboard with stats and quick actions
-- [x] Insights (weekly digest, resurfaced items)
-- [x] Tab-based navigation (Home, Inbox, Search, Collections, Profile)
-- [x] Responsive UI
+#### Free Tier Limits
+- 500 saves
+- 10 collections  
+- 3 AI actions/month
 
-## API Endpoints
+#### Branding
+- [x] App renamed to "Stash Pro" throughout
 
-### Auth
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login
-- `GET /api/auth/me` - Get current user
+---
 
-### Items
-- `POST /api/items` - Create item
-- `GET /api/items` - List items (with filters)
-- `GET /api/items/{id}` - Get item
-- `PUT /api/items/{id}` - Update item
-- `DELETE /api/items/{id}` - Delete item
+## Bug Fixes Applied
 
-### Collections
-- `POST /api/collections` - Create collection
-- `GET /api/collections` - List collections
-- `PUT /api/collections/{id}` - Update collection
-- `DELETE /api/collections/{id}` - Delete collection
+### Session: Feb 12, 2025
+- [x] Fixed missing color references (`gray300`, `gray400`, `gray600`) in `upgrade.tsx` and `onboarding.tsx`
 
-### AI Features
-- `POST /api/items/{id}/ai-summary` - Generate AI summary
-- `POST /api/items/{id}/extract-ideas` - Extract key ideas
-- `POST /api/items/{id}/smart-tags` - Get smart tag suggestions
-- `POST /api/items/{id}/action-items` - Generate action items
-- `GET /api/items/{id}/suggest-collection` - Get collection suggestion
+### Previous Sessions
+- [x] Fixed `generateSummary` not defined error
+- [x] Fixed `colors.white` undefined crash on item detail page
+- [x] Fixed unresponsive delete button in collection detail
+- [x] Fixed `import json` missing in backend for Key Ideas feature
+- [x] Replaced emojis with Ionicons for professional look
 
-### Pro Features
-- `GET /api/users/plan` - Get user's plan and limits
-- `POST /api/users/upgrade-pro` - Upgrade to Pro (MOCKED)
-- `POST /api/users/cancel-pro` - Cancel Pro subscription
-- `GET /api/search/advanced` - Advanced search (Pro only)
-- `GET /api/export/vault` - Export all data (Pro only)
-- `GET /api/reminders` - Smart reminders (Pro only)
+---
 
-### Other
-- `GET /api/insights` - Get user insights and weekly digest
-- `GET /api/search` - Basic search
-- `GET /api/tags` - Get all user tags
-- `POST /api/extract-metadata` - Extract URL metadata
+## Prioritized Backlog
 
-## Database Schema
+### P0 - Critical (Current Sprint)
+1. **Complete Share Extension Implementation** - IN PROGRESS
+   - Build share panel UI
+   - Implement URL metadata extraction
+   - Connect to itemsStore
+   - Handle offline queuing
 
-### users
-```json
-{
-  "id": "uuid",
-  "email": "string",
-  "password": "hashed",
-  "name": "string",
-  "plan_type": "free|pro",
-  "is_pro": "boolean",
-  "pro_expires_at": "datetime|null",
-  "preferences": {
-    "save_types": [],
-    "usage_goals": [],
-    "onboarding_completed": "boolean"
-  },
-  "created_at": "datetime"
-}
-```
+2. **Post-Signup "First Save" Tutorial Screen**
+   - Guide new users after account creation
 
-### items
-```json
-{
-  "id": "uuid",
-  "user_id": "uuid",
-  "url": "string",
-  "title": "string",
-  "thumbnail_url": "string|null",
-  "platform": "string",
-  "content_type": "string",
-  "notes": "string",
-  "tags": ["string"],
-  "collections": ["uuid"],
-  "ai_summary": ["string"],
-  "extracted_ideas": [{}],
-  "action_items": [{}],
-  "created_at": "datetime"
-}
-```
+### P1 - High Priority
+3. **Free Tier AI Action Counter**
+   - Display "X/3 this month" for free users
+   - Show upsell message when exhausted
 
-### collections
-```json
-{
-  "id": "uuid",
-  "user_id": "uuid",
-  "name": "string",
-  "is_auto": "boolean",
-  "created_at": "datetime"
-}
-```
+4. **Analytics Events**
+   - Track: onboarding completion, AI usage, paywall views, conversions
 
-## Plan Limits (Updated Feb 11, 2025)
+5. **Marketing Copy Update**
+   - Add "Save from anywhere in 2 taps" messaging
 
-### Free Plan
-- Max 10 collections
-- Max 500 saves (3 months of collecting)
-- Basic search (find by title)
-- 3 AI suggestions per month
-- Every device sync
-- **Psychological Trigger**: At 450+ saves, upgrade banner appears
-- Free forever
+### P2 - Medium Priority
+6. **Dark Mode**
+   - Theme switcher in settings
+   - Full dark color palette
 
-### Pro Plan - $39.99/year or $4.99/month
-- Unlimited saves & collections
-- Advanced search (within notes & tags)
-- AI suggests smart tags - user approves in 1 tap
-- AI generates summaries - on demand
-- AI recommends collections - one tap to add
-- Smart resurfacing reminders
-- Vault export
-- Priority performance
-- **Trial**: 14 days free (card required)
+7. **Real Payment Integration**
+   - Stripe or RevenueCat for actual subscriptions
 
-## File Structure
+### P3 - Nice to Have
+8. **Push Notifications for Smart Reminders**
+9. **Haptic Feedback & Animations Polish**
+
+---
+
+## Technical Architecture
+
 ```
 /app
 ├── backend/
-│   ├── server.py          # Main FastAPI app
-│   ├── .env               # Environment variables
-│   ├── requirements.txt   # Python dependencies
-│   └── tests/             # Backend tests
+│   ├── server.py         # FastAPI, all API endpoints, AI integration
+│   ├── .env              # MONGO_URL, EMERGENT_API_KEY
+│   └── requirements.txt
 └── frontend/
     ├── app/
-    │   ├── (tabs)/        # Tab screens
-    │   │   ├── home.tsx
-    │   │   ├── inbox.tsx
-    │   │   ├── search.tsx
-    │   │   ├── collections.tsx
-    │   │   └── profile.tsx
-    │   ├── item/[id].tsx  # Item detail
+    │   ├── (tabs)/       # Tab navigation screens
+    │   ├── onboarding.tsx
+    │   ├── upgrade.tsx   # Paywall
+    │   ├── item/[id].tsx # Item detail with AI Suggestions
     │   ├── collection/[id].tsx
-    │   ├── upgrade.tsx    # Pro paywall
-    │   ├── onboarding.tsx # User onboarding
-    │   ├── login.tsx
-    │   └── register.tsx
-    └── src/
-        ├── components/    # UI components
-        ├── store/         # Zustand stores
-        ├── hooks/
-        ├── types/
-        └── utils/
+    │   ├── share.tsx     # Share Extension UI (WIP)
+    │   └── ...
+    ├── src/
+    │   ├── store/        # Zustand stores
+    │   ├── hooks/        # useTheme, etc.
+    │   ├── api/          # metadataService.ts
+    │   └── utils/        # theme.ts, config.ts
+    └── app.json          # Expo config
 ```
 
-## Testing
-- Test file: `/app/backend/tests/test_pro_subscription.py`
-- 16 tests covering Pro subscription features
-- All tests passing (100%)
+## Key Integrations
+- **AI**: OpenAI GPT-4 via `emergentintegrations` library with Emergent LLM Key
+- **Database**: MongoDB
+- **Framework**: Expo (React Native) + FastAPI
 
-## Deployment Readiness (Feb 9, 2025)
-All deployment blockers resolved:
-- ✅ requirements.txt: Added httpx, beautifulsoup4, lxml
-- ✅ Expo env: Added EXPO_PACKAGER_PROXY_URL
-- ✅ JWT Secret: Added to backend/.env
-- ✅ Database queries: Optimized with projections (exclude _id)
-- ✅ N+1 query fix: Collections endpoint uses aggregation pipeline
-- ✅ CORS: Properly configured
-- ✅ Environment variables: All URLs/credentials from .env
+---
 
-## Known Limitations
-1. Pro upgrade is MOCKED - no real payment integration
-2. Pro subscription duration hardcoded to 30 days
-3. No automatic Pro expiration enforcement
-
-## Upcoming/Future Tasks
-
-### P1 - High Priority
-- None currently
-
-### P2 - Medium Priority
-- Dark mode implementation
-- Share extension onboarding screen
-- Push notifications for smart reminders
-
-### P3 - Low Priority
-- UI/UX polish and animations
-- Real payment integration (Stripe/RevenueCat)
-- Pro expiration enforcement
+## Test Credentials
+- Register new user: Any email/password (e.g., `test@test.com` / `password`)
+- New users start on "Free" plan with 500 saves, 10 collections
