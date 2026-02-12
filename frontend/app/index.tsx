@@ -25,7 +25,7 @@ export default function WelcomeScreen() {
           <Ionicons name="layers" size={48} color={colors.accent} />
         </View>
         
-        <Text style={[styles.title, { color: colors.text }]}>Stash</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Stash Pro</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Your private content vault for ideas worth keeping
         </Text>

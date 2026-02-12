@@ -186,7 +186,7 @@ export default function OnboardingScreen() {
             <View style={[styles.stepNumber, { backgroundColor: colors.gray100 }]}>
               <Text style={styles.stepNumberText}>1</Text>
             </View>
-            <Text style={styles.stepText}>Tap share → Choose Stash</Text>
+            <Text style={styles.stepText}>Tap share → Choose Stash Pro</Text>
           </View>
           <View style={styles.stepItem}>
             <View style={[styles.stepNumber, { backgroundColor: colors.gray100 }]}>
@@ -229,7 +229,7 @@ export default function OnboardingScreen() {
         
         <View style={styles.philosophyBox}>
           <Text style={styles.philosophyText}>
-            Stash remembers the content.
+            Stash Pro remembers the content.
           </Text>
           <Text style={styles.philosophyBold}>You stay in control.</Text>
         </View>
@@ -257,7 +257,7 @@ export default function OnboardingScreen() {
       <View style={styles.contentTop}>
         <Text style={styles.headline}>What do you save most?</Text>
         <Text style={styles.subtext}>
-          We'll tailor your Stash experience — you approve every suggestion.
+          We'll tailor your Stash Pro experience — you approve every suggestion.
         </Text>
 
         <View style={styles.optionsContainer}>
@@ -300,7 +300,7 @@ export default function OnboardingScreen() {
         onPress={handleNext}
         disabled={!selectedCategory}
       >
-        <Text style={styles.ctaText}>Personalise My Stash</Text>
+        <Text style={styles.ctaText}>Personalise My Stash Pro</Text>
         <Ionicons name="arrow-forward" size={20} color={colors.white} />
       </TouchableOpacity>
     </View>
